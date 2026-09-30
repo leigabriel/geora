@@ -46,6 +46,17 @@ export function createAudio() {
     return enabled
   }
 
+  // Tone throws if two notes are scheduled at the same context time, which
+  // happens easily when a hover blip and a ui pip land in the same tick. Every
+  // trigger goes through here so start times are always strictly increasing.
+  let lastAt = 0
+  function at(offset = 0) {
+    const now = Tone.now()
+    const base = now > lastAt ? now : lastAt
+    lastAt = base + 0.004
+    return base + offset
+  }
+
   // speed is the drag velocity, roughly 0 to 1
   function swipeSound(speed = 0) {
     if (!enabled || !swipe) return
@@ -54,21 +65,21 @@ export function createAudio() {
     if (now - lastSwipe < 130 - level * 70) return
     lastSwipe = now
     swipe.volume.rampTo(-32 + level * 14, 0.02)
-    swipe.triggerAttackRelease(420 + level * level * 900, "64n")
+    swipe.triggerAttackRelease(420 + level * level * 900, "64n", at())
   }
 
   // low thunk when the drag is released
   function swipeStop() {
     if (!enabled || !swipe) return
     swipe.volume.rampTo(-28, 0.02)
-    swipe.triggerAttackRelease(190, "16n")
+    swipe.triggerAttackRelease(190, "16n", at())
   }
 
   function selectChime() {
     if (!enabled || !chime) return
-    const now = Tone.now()
-    chime.triggerAttackRelease(["E5", "B5"], "16n", now)
-    chime.triggerAttackRelease(["G#5", "E6"], "16n", now + 0.08)
+    const start = at()
+    chime.triggerAttackRelease(["E5", "B5"], "16n", start)
+    chime.triggerAttackRelease(["G#5", "E6"], "16n", start + 0.08)
   }
 
   function hoverBlip() {
@@ -76,12 +87,12 @@ export function createAudio() {
     const now = performance.now()
     if (now - lastHover < 90) return
     lastHover = now
-    ui.triggerAttackRelease("C6", "64n")
+    ui.triggerAttackRelease("C6", "64n", at())
   }
 
   function closeBlip() {
     if (!enabled || !ui) return
-    ui.triggerAttackRelease("A4", "32n")
+    ui.triggerAttackRelease("A4", "32n", at())
   }
 
   function pip(note = "C6") {
@@ -89,7 +100,7 @@ export function createAudio() {
     const now = performance.now()
     if (now - lastBlip < 60) return
     lastBlip = now
-    ui.triggerAttackRelease(note, "32n")
+    ui.triggerAttackRelease(note, "32n", at())
   }
 
   function dispose() {
