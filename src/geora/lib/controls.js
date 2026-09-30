@@ -1,11 +1,25 @@
-// pointer, wheel and pinch gestures on the globe canvas
-export function bindControls({ scene, audio, onHover, onSelect, onClear }) {
+// Pointer, wheel and pinch gestures on the globe canvas.
+//
+// Selection is resolved on release, not on press, so a drag never selects. A
+// release is one of three things: a marker, bare sphere (which is where a sticker
+// or photo gets pinned), or empty space, which clears the open card.
+export function bindControls({ scene, audio, onHover, onSelect, onSphere, onClear }) {
   let dragging = false
   let moved = 0
   let last = { x: 0, y: 0 }
   let pinch = null
+  // hovering is emitted on change only: the tooltip follows the beacon, not
+  // the pointer, so a move across the same marker costs one render, not one
+  // per pixel
+  let hovered
 
   const overChrome = (target) => Boolean(target?.closest?.("[data-ui]"))
+
+  function emitHover(descriptor, x, y) {
+    if (descriptor === hovered) return
+    hovered = descriptor
+    onHover?.(descriptor, x, y)
+  }
 
   function down(event) {
     if (overChrome(event.target)) return
@@ -16,15 +30,18 @@ export function bindControls({ scene, audio, onHover, onSelect, onClear }) {
   }
 
   function move(event) {
-    if (overChrome(event.target)) return
-
+    if (overChrome(event.target)) {
+      // leaving the globe for the HUD must not leave a tooltip hanging around
+      if (!dragging) emitHover(null)
+      return
+    }
     if (!dragging) {
-      const marker = scene.pick(event.clientX, event.clientY)
-      onHover?.(marker?.place ?? null, event.clientX, event.clientY)
+      const descriptor = scene.pick(event.clientX, event.clientY)
+      emitHover(descriptor, event.clientX, event.clientY)
       return
     }
 
-    onHover?.(null)
+    emitHover(null)
     const dx = event.clientX - last.x
     const dy = event.clientY - last.y
     const dist = Math.hypot(dx, dy)
@@ -37,24 +54,33 @@ export function bindControls({ scene, audio, onHover, onSelect, onClear }) {
     }
   }
 
-  function up(event) {
+  function release(event) {
     if (!dragging) return
     dragging = false
+    hovered = null
     scene.setDragging(false)
 
-    if (moved < 6) {
-      if (!overChrome(event.target)) {
-        const marker = scene.pick(event.clientX, event.clientY)
-        if (marker) onSelect?.(marker.place, event.clientX, event.clientY)
-        else onClear?.()
-      }
+    if (moved >= 6) {
+      audio.swipeStop()
       return
     }
-    audio.swipeStop()
+
+    if (overChrome(event.target)) return
+    const hit = scene.probe(event.clientX, event.clientY)
+    if (!hit) {
+      onClear?.(event.clientX, event.clientY)
+      return
+    }
+    if (hit.hit === "marker") {
+      onSelect?.(hit.descriptor, event.clientX, event.clientY)
+      return
+    }
+    onSphere?.(hit, event.clientX, event.clientY)
   }
 
   function cancel() {
     dragging = false
+    hovered = null
     scene.setDragging(false)
   }
 
@@ -88,7 +114,7 @@ export function bindControls({ scene, audio, onHover, onSelect, onClear }) {
 
   window.addEventListener("pointerdown", down)
   window.addEventListener("pointermove", move)
-  window.addEventListener("pointerup", up)
+  window.addEventListener("pointerup", release)
   window.addEventListener("pointercancel", cancel)
   window.addEventListener("wheel", wheel, { passive: true })
   window.addEventListener("touchstart", touchStart, { passive: true })
@@ -99,7 +125,7 @@ export function bindControls({ scene, audio, onHover, onSelect, onClear }) {
   return () => {
     window.removeEventListener("pointerdown", down)
     window.removeEventListener("pointermove", move)
-    window.removeEventListener("pointerup", up)
+    window.removeEventListener("pointerup", release)
     window.removeEventListener("pointercancel", cancel)
     window.removeEventListener("wheel", wheel)
     window.removeEventListener("touchstart", touchStart)
