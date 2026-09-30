@@ -2,12 +2,28 @@
 @source "../";
 
 /* self hosted, cached by `npm run assets` */
+
+/* the globe interface reads in Departure Mono */
+@font-face {
+  font-family: "Departure Mono";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/departure-mono.woff2") format("woff2");
+}
+
+/* documentation is set in JetBrains Mono, which is easier to read at length */
 @font-face {
   font-family: "JetBrains Mono";
   font-style: normal;
   font-weight: 100 800;
   font-display: swap;
   src: url("/fonts/jetbrains-mono-latin.woff2") format("woff2");
+}
+
+@theme {
+  --font-readout: "Departure Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-prose: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 :root {
@@ -54,6 +70,28 @@ body.theme-matrix {
   --panel-shadow: 0 12px 36px -6px rgba(0, 0, 0, 0.8);
 }
 
+body.theme-blueprint {
+  --bg-color: #061225;
+  --fg-color: #cfe4ff;
+  --accent-color: #4da3ff;
+  --accent-subtle: rgba(77, 163, 255, 0.16);
+  --dim-color: #4a6a92;
+  --border-color: #14304f;
+  --card-bg: rgba(8, 22, 44, 0.94);
+  --panel-shadow: 0 12px 36px -6px rgba(0, 0, 0, 0.8);
+}
+
+body.theme-dusk {
+  --bg-color: #120a1e;
+  --fg-color: #e8dcff;
+  --accent-color: #b08cff;
+  --accent-subtle: rgba(176, 140, 255, 0.16);
+  --dim-color: #6d5a94;
+  --border-color: #2c1f47;
+  --card-bg: rgba(24, 15, 40, 0.94);
+  --panel-shadow: 0 12px 36px -6px rgba(0, 0, 0, 0.8);
+}
+
 html,
 body,
 #root {
@@ -64,7 +102,7 @@ body {
   margin: 0;
   background-color: var(--bg-color);
   color: var(--fg-color);
-  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace,
+  font-family: "Departure Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace,
     "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", monospace;
   overflow: hidden;
   overscroll-behavior: none;
@@ -83,7 +121,10 @@ body {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
 }
 
-.bit-panel {
+/* `:where()` keeps this at zero specificity: Tailwind's border and shadow
+   utilities were being silently overridden by this shorthand, which killed the
+   active state on the top bar and every panel shadow. */
+:where(.bit-panel) {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   box-shadow: var(--panel-shadow);
@@ -91,10 +132,77 @@ body {
   -webkit-backdrop-filter: blur(14px);
 }
 
+/* Side panels slide on `transform`, not the `translate` property: a transition
+   between `100%` and `0px` in `translate` does not interpolate reliably and
+   leaves the computed value stuck off screen. */
+.slide-right {
+  transform: translateX(0);
+  transition: transform 0.3s ease;
+}
+
+.slide-right[data-closed="true"] {
+  transform: translateX(100%);
+}
+
 .scanlines {
   background-image: linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.22) 50%);
   background-size: 100% 3px;
   pointer-events: none;
+}
+
+/* Framed tool clusters. The HUD reads as a set of boxes so a tap target has a
+   visible boundary, and the active state fills the box rather than colouring
+   type alone. */
+.hud-btn {
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.6rem;
+  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+.hud-btn:hover,
+.hud-btn[data-pressed="true"] {
+  background: var(--accent-subtle);
+  color: var(--accent-color);
+}
+
+.hud-btn[data-pressed="true"] {
+  outline: 1px solid var(--accent-color);
+  outline-offset: 1px;
+}
+
+/* transient status line in the bottom dock: in from below, held, then gone */
+.notice {
+  animation: notice-in 0.22s ease both, notice-out 0.4s ease 3s both;
+}
+
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes notice-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.ring-draw {
+  transition: stroke-dashoffset 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.meter-fill {
+  background: var(--accent-color);
+  opacity: 0.16;
+  transition: width 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 input[type="range"] {
@@ -141,6 +249,41 @@ input[type="range"]::-moz-range-thumb {
 .custom-scroll::-webkit-scrollbar-thumb {
   background: var(--border-color);
   border-radius: 2px;
+}
+
+/* ---- cursor -------------------------------------------------------------- */
+/* one rule for every interactive element, so the pointer never lies */
+:where(button, [role="button"], a[href], summary, input[type="range"]) {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+canvas {
+  cursor: grab;
+}
+
+[data-marker-hover="true"] canvas {
+  cursor: pointer;
+}
+
+[data-dragging="true"] canvas {
+  cursor: grabbing;
+}
+
+.select-text,
+input[type="text"],
+input[type="search"],
+input[type="number"] {
+  cursor: text;
+}
+
+/* reading surfaces are text, but anything actionable inside them still points */
+.select-text :where(button, [role="button"]) {
+  cursor: pointer;
 }
 
 [data-ui] {
