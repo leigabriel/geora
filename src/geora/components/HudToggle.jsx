@@ -6,9 +6,11 @@ export default function HudToggle({ visible, onToggle }) {
       onClick={onToggle}
       title={visible ? 'Hide interface (H)' : 'Show interface (H)'}
       aria-label={visible ? 'Hide interface' : 'Show interface'}
-      className="bit-panel fixed right-3 bottom-3 z-20 flex h-9 w-9 items-center justify-center rounded-xl border transition-colors hover:border-(--accent-color) hover:text-(--accent-color) active:scale-95 sm:right-4 sm:bottom-4"
+      aria-pressed={visible}
+      style={{ bottom: 'var(--hud-safe-bottom)' }}
+      className="bit-panel hud-corner fixed right-3 z-20 flex w-9 items-center justify-center border transition-colors hover:border-(--accent-color) hover:text-(--accent-color) active:scale-95 sm:right-4"
     >
-      <i className={`fa-solid ${visible ? 'fa-eye' : 'fa-eye-slash'}`} />
+      <i className={`fa-solid ${visible ? 'fa-eye' : 'fa-eye-slash'}`} aria-hidden="true" />
     </button>
   )
 }

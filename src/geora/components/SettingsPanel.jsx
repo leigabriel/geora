@@ -84,97 +84,58 @@ export default function SettingsPanel({
       <aside
         data-ui
         data-closed={!open}
-        className={`bit-panel slide-right fixed inset-y-0 right-0 z-[60] flex w-[92vw] max-w-[560px] flex-col gap-4 border-l p-4 shadow-2xl sm:w-[560px] sm:max-w-[min(560px,80vw)] sm:p-5 ${
+        role="dialog"
+        aria-modal="true"
+        aria-label="Settings"
+        className={`bit-panel slide-right fixed inset-y-0 right-0 z-[60] flex w-[92vw] max-w-[520px] flex-col gap-4 border-l p-4 shadow-2xl sm:w-[520px] sm:max-w-[min(520px,80vw)] sm:p-5 ${
           open ? '' : 'pointer-events-none'
         }`}
       >
         <div className="flex shrink-0 items-center justify-between border-b border-(--border-color) pb-3">
           <div className="flex items-center gap-2.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-(--accent-color) animate-ping" />
+            <span className="h-2 w-2 rounded-full bg-(--accent-color)" aria-hidden="true" />
             <span className="text-xs font-bold uppercase tracking-[0.2em]">Settings</span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-sm opacity-70 transition-colors hover:bg-(--border-color) hover:opacity-100"
+            className="hud-btn min-h-[2rem] min-w-[2rem] p-1.5 text-sm opacity-70"
             title="Close panel (Esc)"
-            aria-label="Close panel"
+            aria-label="Close settings"
           >
-            <i className="fa-solid fa-xmark" />
+            <i className="fa-solid fa-xmark" aria-hidden="true" />
           </button>
         </div>
 
         <div className="custom-scroll flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain pr-1 select-text">
 
-        <Section title="Halftone Calibration" note="How the point cloud itself is drawn.">
-          <Slider
-            label="Density"
-            value={halftone.density}
-            min={0.2}
-            max={1}
-            step={0.02}
-            display={`${Math.round(halftone.density * 100)}%`}
-            onChange={(density) => set({ density })}
-          />
-          <Slider
-            label="Scale"
-            value={halftone.scale}
-            min={0.5}
-            max={2.4}
-            step={0.05}
-            display={`${halftone.scale.toFixed(2)}x`}
-            onChange={(scale) => set({ scale })}
-          />
-          <Slider
-            label="Contrast"
-            value={halftone.contrast}
-            min={0.3}
-            max={2.2}
-            step={0.05}
-            display={`${halftone.contrast.toFixed(2)}x`}
-            onChange={(contrast) => set({ contrast })}
-          />
-          <Slider
-            label="Threshold"
-            value={halftone.threshold}
-            min={0.3}
-            max={0.52}
-            step={0.005}
-            display={halftone.threshold.toFixed(3)}
-            onChange={(threshold) => set({ threshold })}
-          />
-          <Slider
-            label="Intensity"
-            value={halftone.intensity}
-            min={0.3}
-            max={1.6}
-            step={0.05}
-            display={`${halftone.intensity.toFixed(2)}x`}
-            onChange={(intensity) => set({ intensity })}
-          />
-          <div className="grid grid-cols-2 gap-2 border-t border-(--border-color) pt-2.5">
-            <Slider
-              label="Ambient fill"
-              value={halftone.ambient}
-              min={0.2}
-              max={1}
-              step={0.02}
-              display={halftone.ambient.toFixed(2)}
-              onChange={(ambient) => set({ ambient })}
-            />
-            <Slider
-              label="Ocean dots"
-              value={halftone.ocean}
-              min={0}
-              max={1}
-              step={0.02}
-              display={halftone.ocean.toFixed(2)}
-              onChange={(ocean) => set({ ocean })}
-            />
+        <Section title="Display" note="Globe detail, marker visibility and theme.">
+          <div className="grid grid-cols-2 gap-1.5" role="group" aria-label="Theme">
+            {Object.entries(THEMES).map(([key, theme]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => onTheme(key)}
+                aria-pressed={themeKey === key}
+                aria-label={`Theme ${theme.label}`}
+                className={`flex min-h-[2.5rem] items-center gap-2 rounded-lg border px-2 py-1.5 text-left text-[11px] transition-colors ${
+                  themeKey === key
+                    ? 'border-(--accent-color) text-(--accent-color)'
+                    : 'border-(--border-color) opacity-75 hover:opacity-100'
+                }`}
+              >
+                <span
+                  className="h-4 w-4 shrink-0 rounded-full border"
+                  aria-hidden="true"
+                  style={{ background: `#${theme.bg.toString(16).padStart(6, '0')}` }}
+                />
+                <span className="min-w-0">
+                  <span className="block truncate font-bold">{theme.label}</span>
+                  <span className="block truncate text-[9px] opacity-55">#{theme.border.toString(16).padStart(6, '0')}</span>
+                </span>
+              </button>
+            ))}
           </div>
-        </Section>
-
-        <Section title="Visual Profile" note="How the globe is framed and how much it moves.">
           <Slider
             label="Globe scale"
             value={profile.globeScale}
@@ -185,7 +146,7 @@ export default function SettingsPanel({
             onChange={(globeScale) => setProfile({ globeScale })}
           />
           <Slider
-            label="Marker scale"
+            label="Marker visibility"
             value={profile.markerScale}
             min={0.5}
             max={1.8}
@@ -195,17 +156,18 @@ export default function SettingsPanel({
           />
           <div className="flex flex-col gap-1">
             <div className="flex justify-between text-[12px]">
-              <span>Detail level</span>
-              <span className="font-readout text-(--accent-color)">{profile.detail}</span>
+              <span id="detail-label">Globe detail</span>
+              <span className="font-readout text-(--accent-color)" aria-hidden="true">{profile.detail}</span>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1" role="group" aria-labelledby="detail-label">
               {['LOW', 'MEDIUM', 'HIGH'].map((label, index) => (
                 <button
                   key={label}
                   type="button"
                   onClick={() => setProfile({ detail: index })}
                   aria-pressed={profile.detail === index}
-                  className={`flex-1 rounded-lg border py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                  aria-label={`Detail ${label}`}
+                  className={`min-h-[2.25rem] flex-1 rounded-lg border py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${
                     profile.detail === index
                       ? 'border-(--accent-color) text-(--accent-color)'
                       : 'border-(--border-color) opacity-70 hover:opacity-100'
@@ -216,6 +178,87 @@ export default function SettingsPanel({
               ))}
             </div>
           </div>
+          <details className="rounded-lg border border-(--border-color) px-2 py-1.5">
+            <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-wider opacity-80">
+              Halftone calibration
+            </summary>
+            <div className="mt-2 flex flex-col gap-2.5">
+              <Slider
+                label="Density"
+                value={halftone.density}
+                min={0.2}
+                max={1}
+                step={0.02}
+                display={`${Math.round(halftone.density * 100)}%`}
+                onChange={(density) => set({ density })}
+              />
+              <Slider
+                label="Dot scale"
+                value={halftone.scale}
+                min={0.5}
+                max={2.4}
+                step={0.05}
+                display={`${halftone.scale.toFixed(2)}x`}
+                onChange={(scale) => set({ scale })}
+              />
+              <Slider
+                label="Contrast"
+                value={halftone.contrast}
+                min={0.3}
+                max={2.2}
+                step={0.05}
+                display={`${halftone.contrast.toFixed(2)}x`}
+                onChange={(contrast) => set({ contrast })}
+              />
+              <Slider
+                label="Threshold"
+                value={halftone.threshold}
+                min={0.3}
+                max={0.52}
+                step={0.005}
+                display={halftone.threshold.toFixed(3)}
+                onChange={(threshold) => set({ threshold })}
+              />
+              <Slider
+                label="Intensity"
+                value={halftone.intensity}
+                min={0.3}
+                max={1.6}
+                step={0.05}
+                display={`${halftone.intensity.toFixed(2)}x`}
+                onChange={(intensity) => set({ intensity })}
+              />
+              <div className="grid grid-cols-2 gap-2 border-t border-(--border-color) pt-2.5">
+                <Slider
+                  label="Ambient fill"
+                  value={halftone.ambient}
+                  min={0.2}
+                  max={1}
+                  step={0.02}
+                  display={halftone.ambient.toFixed(2)}
+                  onChange={(ambient) => set({ ambient })}
+                />
+                <Slider
+                  label="Ocean dots"
+                  value={halftone.ocean}
+                  min={0}
+                  max={1}
+                  step={0.02}
+                  display={halftone.ocean.toFixed(2)}
+                  onChange={(ocean) => set({ ocean })}
+                />
+              </div>
+            </div>
+          </details>
+        </Section>
+
+        <Section title="Interaction" note="Auto rotation, camera behaviour and sensitivity.">
+          <Toggle
+            label="Motion sensitivity"
+            hint="Turn off to freeze spin, pulses and inertia."
+            checked={profile.motion}
+            onChange={(motion) => setProfile({ motion })}
+          />
           <Slider
             label="Animation intensity"
             value={profile.animation}
@@ -225,43 +268,10 @@ export default function SettingsPanel({
             display={`${profile.animation.toFixed(2)}x`}
             onChange={(animation) => setProfile({ animation })}
           />
-          <Toggle
-            label="Motion sensitivity"
-            hint="Turn off to freeze spin, pulses and inertia."
-            checked={profile.motion}
-            onChange={(motion) => setProfile({ motion })}
-          />
         </Section>
 
-        <Section title="Sounds" note="Synthesized in the browser, no audio files.">
-          <Toggle label="Audio enabled" checked={sound} onChange={onSound} />
-        </Section>
-
-        <Section title="Themes" note="Background, globe, text, markers, HUD and accents move together.">
-          <div className="grid grid-cols-2 gap-1.5">
-            {Object.entries(THEMES).map(([key, theme]) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => onTheme(key)}
-                aria-pressed={themeKey === key}
-                className={`flex items-center gap-2 rounded-lg border px-2 py-1.5 text-left text-[11px] transition-colors ${
-                  themeKey === key
-                    ? 'border-(--accent-color) text-(--accent-color)'
-                    : 'border-(--border-color) opacity-75 hover:opacity-100'
-                }`}
-              >
-                <span
-                  className="h-4 w-4 shrink-0 rounded-full border"
-                  style={{ background: `#${theme.bg.toString(16).padStart(6, '0')}` }}
-                />
-                <span className="min-w-0">
-                  <span className="block truncate font-bold">{theme.label}</span>
-                  <span className="block truncate text-[9px] opacity-55">#{theme.border.toString(16).padStart(6, '0')}</span>
-                </span>
-              </button>
-            ))}
-          </div>
+        <Section title="Audio" note="Interface sounds, synthesized in the browser.">
+          <Toggle label="Interface sounds" hint="Hover blips, selection chimes and UI pips." checked={sound} onChange={onSound} />
         </Section>
         </div>
       </aside>
