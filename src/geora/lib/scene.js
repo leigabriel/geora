@@ -12,9 +12,10 @@ const MIN_RATIO = 0.62
 const MAX_RATIO = 1.7
 const FOCUS_RATIO = 0.8
 // how much of the shorter viewport axis the globe is allowed to fill when idle
-const GLOBE_FILL = 1.5
+// 1.42 keeps the globe dominant with intentional breathing room: large enough
+// to lead, small enough that the HUD never has to fight it.
+const GLOBE_FILL = 1.42
 const Y_AXIS = new THREE.Vector3(0, 1, 0)
-const WARN_COLOR = 0xff5d5d
 const HOME_QUATERNION = () => new THREE.Quaternion().setFromEuler(new THREE.Euler(0.18, -1.2, 0, "YXZ"))
 const FALLBACK_LAND = [
   [[-168, 65], [-140, 70], [-100, 70], [-60, 55], [-75, 35], [-80, 25], [-97, 26], [-105, 20], [-120, 35], [-130, 54]],
@@ -97,12 +98,14 @@ function drawFlagTexture(ctx, img) {
   ctx.clip()
   ctx.drawImage(img, 4, 4, 120, 88)
   ctx.restore()
+  // Light frame: thin white edge for lift, hairline dark edge for definition.
+  // No heavy shadow so clustered beacons stay separable from the point cloud.
   ctx.strokeStyle = "#ffffff"
-  ctx.lineWidth = 5
+  ctx.lineWidth = 3
   roundedRect(ctx, 4, 4, 120, 88, 10)
   ctx.stroke()
-  ctx.strokeStyle = "rgba(0, 0, 0, 0.35)"
-  ctx.lineWidth = 1.5
+  ctx.strokeStyle = "rgba(0, 0, 0, 0.18)"
+  ctx.lineWidth = 1
   roundedRect(ctx, 4, 4, 120, 88, 10)
   ctx.stroke()
 }
@@ -138,41 +141,6 @@ function paintServerGlyph(ctx) {
   for (let i = 0; i < 3; i += 1) {
     ctx.fillRect(27, 26 + i * 20, 7, 4)
   }
-}
-
-const EMOJI_FONT = '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif'
-
-// weather markers are emoji only: a glyph with a white outline, no card,
-// no backdrop and no text
-function paintOutlinedEmoji(ctx, glyph, size) {
-  ctx.clearRect(0, 0, size, size)
-  ctx.textAlign = "center"
-  ctx.textBaseline = "middle"
-  ctx.font = `${Math.round(size * 0.62)}px ${EMOJI_FONT}`
-  ctx.lineJoin = "round"
-  ctx.miterLimit = 2
-  ctx.lineWidth = Math.round(size * 0.13)
-  ctx.strokeStyle = "#ffffff"
-  ctx.strokeText(glyph, size / 2, size / 2 + size * 0.03)
-  ctx.fillText(glyph, size / 2, size / 2 + size * 0.03)
-}
-
-// a sticker reads as a sticker on any theme: a dark halo to lift it off the
-// point cloud, a white inner outline for contrast, then the glyph itself
-function paintStickerGlyph(ctx, glyph, size) {
-  ctx.clearRect(0, 0, size, size)
-  ctx.textAlign = "center"
-  ctx.textBaseline = "middle"
-  ctx.font = `${Math.round(size * 0.62)}px ${EMOJI_FONT}`
-  ctx.lineJoin = "round"
-  ctx.miterLimit = 2
-  ctx.lineWidth = Math.round(size * 0.16)
-  ctx.strokeStyle = "rgba(0, 0, 0, 0.5)"
-  ctx.strokeText(glyph, size / 2, size / 2 + size * 0.03)
-  ctx.lineWidth = Math.round(size * 0.08)
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.92)"
-  ctx.strokeText(glyph, size / 2, size / 2 + size * 0.03)
-  ctx.fillText(glyph, size / 2, size / 2 + size * 0.03)
 }
 
 const DOT_VERTEX = `
@@ -292,7 +260,7 @@ export function createGlobeScene({ container, config }) {
     // zoom is kept relative to the fitted distance so a resize or a rotation
     // never leaves the camera parked far from the globe
     ratio: 1,
-    globeScale: 1,
+    globeScale: 0.7,
     easing: false,
     locked: false,
     dragging: false,
@@ -307,7 +275,9 @@ export function createGlobeScene({ container, config }) {
   function applyZoom() {
     const clamped = Math.min(Math.max(state.ratio, MIN_RATIO), MAX_RATIO)
     state.ratio = clamped
-    state.zoom = state.fit * clamped * state.globeScale
+    // globeScale is a size preference, not a distance: a bigger scale pulls the
+    // camera in so the planet really does read bigger on screen
+    state.zoom = (state.fit * clamped) / state.globeScale
   }
 
   // raster map: red channel = land, green channel = borders
@@ -329,8 +299,8 @@ export function createGlobeScene({ container, config }) {
     return { land: mapPixels[i] / 255, border: mapPixels[i + 1] / 255 }
   }
 
-  // fibonacci sphere point cloud
-  const count = window.innerWidth < 640 ? 18000 : 36000
+  // fibonacci sphere point cloud: dense enough to read as a solid halftone
+  const count = window.innerWidth < 640 ? 30000 : 65000
   const positions = new Float32Array(count * 3)
   const landValues = new Float32Array(count)
   const borderValues = new Float32Array(count)
@@ -363,11 +333,11 @@ export function createGlobeScene({ container, config }) {
   geometry.setAttribute("aScatter", new THREE.BufferAttribute(scatterValues, 1))
 
   const uniforms = {
-    uDotScale: { value: 1.1 },
-    uAmbient: { value: 0.76 },
-    uOceanOpacity: { value: 0.38 },
+    uDotScale: { value: 1 },
+    uAmbient: { value: 0.2 },
+    uOceanOpacity: { value: 1 },
     uContrast: { value: 1 },
-    uThreshold: { value: 0.44 },
+    uThreshold: { value: 0.4 },
     uIntensity: { value: 1 },
     uDensity: { value: 1 },
     uDetail: { value: 1 },
@@ -394,7 +364,7 @@ export function createGlobeScene({ container, config }) {
 
   // ---- display layers -------------------------------------------------------
   const layers = {}
-  const layerOrder = ["country", "sticker", "polaroid", "analytics", "centers", "weather"]
+  const layerOrder = ["country", "polaroid", "analytics", "centers"]
   for (const key of layerOrder) {
     const group = new THREE.Group()
     group.visible = key === "country"
@@ -403,6 +373,27 @@ export function createGlobeScene({ container, config }) {
   }
 
   let accentHex = 0x1a56db
+
+  // Globe interaction states: idle / hover / selected. Hover lifts one beacon,
+  // selection emphasizes it and de-emphasizes the rest so the chosen territory
+  // reads instantly without competing with the point cloud.
+  let hoveredDesc = null
+  let selectedDesc = null
+
+  function sameTarget(a, b) {
+    if (!a || !b || a.kind !== b.kind) return false
+    if (a.place && b.place) return a.place.code === b.place.code
+    if (a.center && b.center) return a.center.id === b.center.id
+    if (a.photo && b.photo) return a.photo.id === b.photo.id
+    return false
+  }
+
+  function emphasisFor(descriptor) {
+    if (selectedDesc && sameTarget(descriptor, selectedDesc)) return 'selected'
+    if (hoveredDesc && sameTarget(descriptor, hoveredDesc)) return 'hover'
+    if (selectedDesc) return 'dimmed'
+    return 'idle'
+  }
 
   // every raycastable record, tagged with the layer it belongs to
   const pickables = []
@@ -488,7 +479,9 @@ export function createGlobeScene({ container, config }) {
     ctx.textBaseline = "middle"
     ctx.fillText(place.code.slice(0, 2), 64, 48)
 
-    const sprite = createSprite(canvas, 0.18, 0.135)
+    // Compact beacon: small enough that neighbours stay separable, large
+    // enough to remain a touch target once scaled by camera distance.
+    const sprite = createSprite(canvas, 0.16, 0.12)
 
     const img = new Image()
     img.onload = () => {
@@ -530,50 +523,7 @@ export function createGlobeScene({ container, config }) {
     pickables.push(entry)
   })
 
-  // ---- weather markers ------------------------------------------------------
-  // emoji with a white outline, nothing else on the globe
-  const WEATHER_CANVAS = 72
-  const weatherEntries = []
-
-  places.forEach((place) => {
-    const group = new THREE.Group()
-    const surface = latLonToVector3(place.lat, place.lon, RADIUS * 1.002)
-    const top = latLonToVector3(place.lat, place.lon, RADIUS * 1.022)
-
-    const canvas = document.createElement("canvas")
-    canvas.width = WEATHER_CANVAS
-    canvas.height = WEATHER_CANVAS
-    const ctx = canvas.getContext("2d")
-
-    const sprite = createSprite(canvas, 0.13, 0.13)
-    sprite.position.copy(top)
-    const hit = makeHit(top, 0.09)
-
-    group.add(sprite, hit)
-    layers.weather.add(group)
-
-    const entry = {
-      layer: "weather",
-      group,
-      anchor: surface,
-      sprite,
-      hit,
-      ctx,
-      glyph: null,
-      row: null,
-      descriptor: { kind: "weather", place, row: null },
-    }
-    weatherEntries.push(entry)
-    pickables.push(entry)
-  })
-
-  function paintWeatherGlyph(entry, glyph) {
-    if (entry.glyph === glyph) return
-    entry.glyph = glyph
-    paintOutlinedEmoji(entry.ctx, glyph, WEATHER_CANVAS)
-    entry.sprite.material.map.needsUpdate = true
-  }
-
+  
   // ---- AI data center beacons ----------------------------------------------
   const centerEntries = []
 
@@ -615,31 +565,40 @@ export function createGlobeScene({ container, config }) {
     pickables.push(entry)
   })
 
-  // ---- analytics beacons ----------------------------------------------------
-  // text-based analytics: the globe only carries a health beacon, the numbers
-  // live in the action toolbar and the info card
+  // ---- analytics markers ----------------------------------------------------
+  // the reading itself is the marker: a floating value over each nation instead
+  // of a pulsing dot, so the layer is text you can read straight off the planet
+  const ANALYTICS_W = 256
+  const ANALYTICS_H = 96
   const analyticsEntries = []
 
   places.forEach((place) => {
     const group = new THREE.Group()
     const surface = latLonToVector3(place.lat, place.lon, RADIUS * 1.004)
+    const top = latLonToVector3(place.lat, place.lon, RADIUS * 1.03)
 
-    const ring = makeRing(surface, 0.02, 0.04, accentHex)
-    const pin = makePin(surface, accentHex)
-    const hit = makeHit(surface, 0.075)
+    const canvas = document.createElement("canvas")
+    canvas.width = ANALYTICS_W
+    canvas.height = ANALYTICS_H
+    const ctx = canvas.getContext("2d")
 
-    group.add(ring, pin, hit)
+    const sprite = createSprite(canvas, 0.24, 0.09)
+    sprite.position.copy(top)
+    const hit = makeHit(top, 0.09)
+
+    group.add(sprite, hit)
     layers.analytics.add(group)
 
     const entry = {
       layer: "analytics",
       group,
       anchor: surface,
-      ring,
-      pin,
+      sprite,
       hit,
-      score: 0.5,
+      ctx,
+      painted: null,
       mag: 0.5,
+      metric: null,
       row: null,
       descriptor: { kind: "analytics", place, row: null },
     }
@@ -647,72 +606,46 @@ export function createGlobeScene({ container, config }) {
     pickables.push(entry)
   })
 
-  // ---- user stickers --------------------------------------------------------
-  const stickerEntries = new Map()
+  // Each reading is a number on a solid black chip. The chip is deliberately
+  // theme-independent: it reads the same on paper and on a dark globe, and it
+  // never collides with the accent colour the rest of the HUD is tuned to.
+  function paintAnalytics(entry) {
+    if (!entry.row) return
+    const meta = config.metricMeta(entry.metric)
+    const value = entry.row[entry.metric]
+    if (!Number.isFinite(value)) return
+    const unit = meta.unit === "%" || meta.unit === "ms" ? meta.unit : ` ${meta.unit}`
+    const text = `${value.toFixed(meta.decimals)}${unit}`
+    const key = `${text}|${meta.unit}`
+    if (entry.painted === key) return
+    entry.painted = key
 
-  function paintStickerFace(entry, sticker) {
-    if (entry.painted === (sticker.src ?? sticker.glyph)) return
-    entry.painted = sticker.src ?? sticker.glyph
-    if (sticker.src) {
-      const img = new Image()
-      img.onload = () => {
-        const size = entry.canvas.width
-        entry.ctx.clearRect(0, 0, size, size)
-        drawCover(entry.ctx, img, 6, 6, size - 12, size - 12)
-        entry.sprite.material.map.needsUpdate = true
-      }
-      img.src = sticker.src
-    } else {
-      paintStickerGlyph(entry.ctx, sticker.glyph, entry.canvas.width)
+    const ctx = entry.ctx
+    ctx.clearRect(0, 0, ANALYTICS_W, ANALYTICS_H)
+    ctx.textAlign = "center"
+    ctx.textBaseline = "middle"
+
+    // long values shrink rather than spill past the chip
+    let size = 44
+    ctx.font = `bold ${size}px "JetBrains Mono", monospace`
+    while (ctx.measureText(text).width > ANALYTICS_W - 40 && size > 16) {
+      size -= 2
+      ctx.font = `bold ${size}px "JetBrains Mono", monospace`
     }
+
+    const width = Math.min(ANALYTICS_W, Math.ceil(ctx.measureText(text).width) + 28)
+    const height = Math.ceil(size * 1.7)
+    const x = (ANALYTICS_W - width) / 2
+    const y = (ANALYTICS_H - height) / 2
+
+    ctx.fillStyle = "#000000"
+    ctx.beginPath()
+    ctx.roundRect(x, y, width, height, height / 2)
+    ctx.fill()
+
+    ctx.fillStyle = "#ffffff"
+    ctx.fillText(text, ANALYTICS_W / 2, ANALYTICS_H / 2 + 1)
     entry.sprite.material.map.needsUpdate = true
-  }
-
-  function createSticker(sticker) {
-    const group = new THREE.Group()
-    const surface = latLonToVector3(sticker.lat, sticker.lon, RADIUS * 1.004)
-    const top = latLonToVector3(sticker.lat, sticker.lon, RADIUS * 1.036)
-
-    const canvas = document.createElement("canvas")
-    canvas.width = 96
-    canvas.height = 96
-    const ctx = canvas.getContext("2d")
-
-    const sprite = createSprite(canvas, 0.13, 0.13)
-    sprite.position.copy(top)
-    const ring = makeRing(surface, 0.016, 0.032, accentHex)
-    const pin = makePin(surface, accentHex)
-    const stem = makeStem(surface, top, accentHex)
-    const hit = makeHit(top, 0.09)
-
-    group.add(ring, pin, stem, sprite, hit)
-    layers.sticker.add(group)
-
-    const entry = {
-      layer: "sticker",
-      group,
-      canvas,
-      ctx,
-      anchor: surface,
-      ring,
-      pin,
-      stem,
-      sprite,
-      hit,
-      scale: 1,
-      painted: null,
-      descriptor: { kind: "sticker", sticker },
-    }
-    stickerEntries.set(sticker.id, entry)
-    pickables.push(entry)
-    applySticker(entry, sticker)
-    return entry
-  }
-
-  function applySticker(entry, sticker) {
-    entry.scale = Number.isFinite(sticker.scale) ? sticker.scale : 1
-    entry.descriptor.sticker = sticker
-    paintStickerFace(entry, sticker)
   }
 
   // ---- user polaroids -------------------------------------------------------
@@ -720,7 +653,13 @@ export function createGlobeScene({ container, config }) {
   const POLAROID_H = 244
   const polaroidEntries = new Map()
 
-  function drawPolaroidCard(ctx, img, caption) {
+  // a photo is labelled by the country it landed in, never by its file name: the
+// picture is the content, the place is the metadata worth reading from orbit
+function polaroidLabel(photo) {
+  return photo.country || "PINNED"
+}
+
+function drawPolaroidCard(ctx, img, label) {
     ctx.fillStyle = "#f6f5f2"
     ctx.fillRect(0, 0, POLAROID_W, POLAROID_H)
     ctx.fillStyle = "#1b1b1f"
@@ -736,8 +675,14 @@ export function createGlobeScene({ container, config }) {
     ctx.fillStyle = "#1b1b1f"
     ctx.textAlign = "center"
     ctx.textBaseline = "middle"
-    ctx.font = 'bold 22px "JetBrains Mono", monospace'
-    ctx.fillText(String(caption || "").slice(0, 18), POLAROID_W / 2, POLAROID_H - 28)
+    // long country names shrink rather than spill past the paper border
+    let size = 20
+    ctx.font = `bold ${size}px "JetBrains Mono", monospace`
+    while (ctx.measureText(label).width > POLAROID_W - 28 && size > 11) {
+      size -= 1
+      ctx.font = `bold ${size}px "JetBrains Mono", monospace`
+    }
+    ctx.fillText(label, POLAROID_W / 2, POLAROID_H - 28)
     ctx.strokeStyle = "rgba(0, 0, 0, 0.25)"
     ctx.lineWidth = 2
     ctx.strokeRect(1, 1, POLAROID_W - 2, POLAROID_H - 2)
@@ -756,7 +701,6 @@ export function createGlobeScene({ container, config }) {
     canvas.width = POLAROID_W
     canvas.height = POLAROID_H
     const ctx = canvas.getContext("2d")
-    drawPolaroidCard(ctx, null, photo.caption)
 
     const texture = new THREE.CanvasTexture(canvas)
     texture.minFilter = THREE.LinearMipmapLinearFilter
@@ -789,6 +733,10 @@ export function createGlobeScene({ container, config }) {
       stem,
       hit,
       scale: 1,
+      ctx,
+      texture,
+      img: null,
+      label: null,
       descriptor: { kind: "polaroid", photo },
     }
     polaroidEntries.set(photo.id, entry)
@@ -796,18 +744,26 @@ export function createGlobeScene({ container, config }) {
     applyPolaroid(entry, photo)
 
     const img = new Image()
-    img.onload = () => {
-      drawPolaroidCard(ctx, img, photo.caption)
-      texture.needsUpdate = true
-    }
+    entry.img = img
+    img.onload = () => paintPolaroid(entry)
     img.src = photo.src
 
     return entry
   }
 
+  function paintPolaroid(entry) {
+    drawPolaroidCard(entry.ctx, entry.img, polaroidLabel(entry.descriptor.photo))
+    entry.texture.needsUpdate = true
+  }
+
   function applyPolaroid(entry, photo) {
     entry.scale = Number.isFinite(photo.scale) ? photo.scale : 1
     entry.descriptor.photo = photo
+    // the paper is redrawn only when its country label actually changes
+    const label = polaroidLabel(photo)
+    if (entry.label === label) return
+    entry.label = label
+    paintPolaroid(entry)
   }
 
   function dropEntry(entry) {
@@ -825,25 +781,10 @@ export function createGlobeScene({ container, config }) {
       material.dispose()
     })
 
-    // forget the tracked references too, otherwise a removed upload keeps its
+    // forget the tracked references too, otherwise a dropped polaroid keeps its
     // decoded bitmap alive for the lifetime of the page
     for (let i = disposables.length - 1; i >= 0; i -= 1) {
       if (owned.includes(disposables[i])) disposables.splice(i, 1)
-    }
-  }
-
-  function setStickers(list) {
-    const seen = new Set()
-    for (const sticker of list) {
-      seen.add(sticker.id)
-      const existing = stickerEntries.get(sticker.id)
-      if (existing) applySticker(existing, sticker)
-      else createSticker(sticker)
-    }
-    for (const [id, entry] of [...stickerEntries]) {
-      if (seen.has(id)) continue
-      stickerEntries.delete(id)
-      dropEntry(entry)
     }
   }
 
@@ -862,42 +803,18 @@ export function createGlobeScene({ container, config }) {
     }
   }
 
-  function paintAnalytics(entry) {
-    const hex = entry.score >= 0.5 ? accentHex : WARN_COLOR
-    entry.ring.material.color.setHex(hex)
-    entry.pin.material.color.setHex(hex)
-  }
-
   function setAnalytics(analytics, metric) {
     if (!analytics) return
     const range = config.metricRange(analytics, metric)
     for (const entry of analyticsEntries) {
       const row = analytics.byCode[entry.descriptor.place.code]
       if (!row) continue
-      const { score, mag } = config.normalizeMetric(range, row[metric])
-      entry.score = score
+      const { mag } = config.normalizeMetric(range, row[metric])
       entry.mag = mag
+      entry.metric = metric
       entry.row = row
       entry.descriptor.row = row
       paintAnalytics(entry)
-    }
-  }
-
-  function setWeather(byCode) {
-    if (!byCode) return
-    for (const entry of weatherEntries) {
-      const row = byCode[entry.descriptor.place.code]
-      if (!row) continue
-      entry.row = row
-      entry.descriptor.row = row
-      paintWeatherGlyph(entry, config.weatherGlyph(row.wmo))
-    }
-  }
-
-  function setCenters(filter) {
-    for (const entry of centerEntries) {
-      const center = entry.descriptor.center
-      entry.group.visible = !filter || filter === "all" || center.tier === filter
     }
   }
 
@@ -944,8 +861,8 @@ export function createGlobeScene({ container, config }) {
     return record.descriptor
   }
 
-  // tap resolution: an existing marker if one is under the cursor, otherwise the
-  // bare sphere, which is where a sticker or photo gets pinned
+// tap resolution: an existing marker if one is under the cursor, otherwise the
+// bare sphere, which is where a photo gets pinned
   function probe(clientX, clientY) {
     const record = markerUnder(clientX, clientY)
     if (record) return { hit: "marker", descriptor: record.descriptor, place: record.descriptor.place ?? null }
@@ -1084,15 +1001,22 @@ export function createGlobeScene({ container, config }) {
 
     if (layers.country.visible) {
       countryEntries.forEach((entry, i) => {
+        const emphasis = emphasisFor(entry.descriptor)
+        const dim = emphasis === 'dimmed' ? 0.38 : 1
+        const lift = emphasis === 'selected' ? 1.25 : emphasis === 'hover' ? 1.15 : 1
         const pulse = pulseFor(now, 0.004 * animation, i * 0.5)
-        entry.ring.scale.setScalar((1 + pulse * 1.5) * markerScale)
-        entry.ring.material.opacity = (1 - pulse) * 0.85
+        entry.ring.scale.setScalar((1 + pulse * 1.2) * markerScale * lift)
+        entry.ring.material.opacity = (1 - pulse) * 0.85 * dim + (emphasis === 'selected' ? 0.15 : 0)
         const visible = facingFade(entry.anchor)
-        entry.sprite.scale.set(entry.sprite.userData.base.x * scale, entry.sprite.userData.base.y * scale, 1)
+        entry.sprite.scale.set(
+          entry.sprite.userData.base.x * scale * lift,
+          entry.sprite.userData.base.y * scale * lift,
+          1,
+        )
         entry.hit.scale.setScalar(scale)
-        entry.sprite.material.opacity = visible * 0.98
-        entry.stem.material.opacity = visible * 0.75
-        entry.pin.material.opacity = visible
+        entry.sprite.material.opacity = visible * 0.98 * dim + (emphasis === 'selected' ? 0.02 : 0)
+        entry.stem.material.opacity = visible * 0.6 * dim
+        entry.pin.material.opacity = visible * dim
         const show = visible > 0.02
         entry.ring.visible = show
         entry.sprite.visible = show
@@ -1101,32 +1025,27 @@ export function createGlobeScene({ container, config }) {
       })
     }
 
-    if (layers.weather.visible) {
-      weatherEntries.forEach((entry) => {
-        // lightweight: a static outlined emoji that fades on the far side
-        const visible = facingFade(entry.anchor)
-        entry.sprite.scale.set(entry.sprite.userData.base.x * scale, entry.sprite.userData.base.y * scale, 1)
-        entry.hit.scale.setScalar(scale)
-        entry.sprite.material.opacity = visible
-        entry.sprite.visible = visible > 0.02
-      })
-    }
-
     if (layers.centers.visible) {
       centerEntries.forEach((entry, i) => {
-        if (!entry.group.visible) return
+        const emphasis = emphasisFor(entry.descriptor)
+        const dim = emphasis === 'dimmed' ? 0.38 : 1
+        const lift = emphasis === 'selected' ? 1.25 : emphasis === 'hover' ? 1.15 : 1
         const pulse = pulseFor(now, 0.005 * animation, i * 0.83)
-        entry.ring.scale.setScalar((1 + pulse * 1.8) * markerScale)
-        entry.ring.material.opacity = (1 - pulse) * 0.9
+        entry.ring.scale.setScalar((1 + pulse * 1.4) * markerScale * lift)
+        entry.ring.material.opacity = ((1 - pulse) * 0.9 + (emphasis === 'selected' ? 0.1 : 0)) * dim
         if (entry.halo) {
           entry.halo.scale.setScalar((0.9 + pulse * 0.5 + breathe * 0.15) * markerScale)
-          entry.halo.material.opacity = 0.22 + breathe * 0.25
+          entry.halo.material.opacity = (0.22 + breathe * 0.25) * dim
         }
         const visible = facingFade(entry.anchor)
-        entry.sprite.scale.set(entry.sprite.userData.base.x * scale, entry.sprite.userData.base.y * scale, 1)
+        entry.sprite.scale.set(
+          entry.sprite.userData.base.x * scale * lift,
+          entry.sprite.userData.base.y * scale * lift,
+          1,
+        )
         entry.hit.scale.setScalar(scale)
-        entry.sprite.material.opacity = visible * 0.98
-        entry.pin.material.opacity = visible
+        entry.sprite.material.opacity = visible * 0.98 * dim
+        entry.pin.material.opacity = visible * dim
         entry.sprite.visible = visible > 0.02
         entry.ring.visible = entry.sprite.visible
         entry.pin.visible = entry.sprite.visible
@@ -1135,54 +1054,35 @@ export function createGlobeScene({ container, config }) {
     }
 
     if (layers.analytics.visible) {
-      analyticsEntries.forEach((entry, i) => {
+      analyticsEntries.forEach((entry) => {
+        const emphasis = emphasisFor(entry.descriptor)
+        const dim = emphasis === 'dimmed' ? 0.35 : 1
+        const lift = emphasis === 'selected' ? 1.2 : emphasis === 'hover' ? 1.12 : 1
         const visible = facingFade(entry.anchor)
-        const wobble = motion ? 1 + Math.sin(now * 0.0025 * animation + i * 0.61) * 0.06 : 1
-        // the ring grows with the active metric, so the layer encodes the
-        // number without drawing a single bar
-        entry.ring.scale.setScalar((0.55 + entry.mag * 0.75) * wobble * markerScale)
-        entry.hit.scale.setScalar(scale)
-        entry.ring.material.opacity = 0.35 + visible * 0.6
-        entry.pin.material.opacity = visible * 0.8
-        entry.ring.visible = visible > 0.02
-        entry.pin.visible = entry.ring.visible
-      })
-    }
-
-    if (layers.sticker.visible && stickerEntries.size > 0) {
-      let i = 0
-      stickerEntries.forEach((entry) => {
-        const pulse = pulseFor(now, 0.005 * animation, i * 0.9)
-        entry.ring.scale.setScalar((1 + pulse * 1.6) * markerScale)
-        entry.ring.material.opacity = (1 - pulse) * 0.9
-        const visible = facingFade(entry.anchor)
-        const s = scale * entry.scale
+        // the label carries the number, and its size carries the magnitude, so a
+        // strong reading is legible from further out than a weak one
+        const s = scale * (0.78 + entry.mag * 0.44) * lift
         entry.sprite.scale.set(entry.sprite.userData.base.x * s, entry.sprite.userData.base.y * s, 1)
-        entry.hit.scale.setScalar(s)
-        entry.sprite.material.opacity = visible
-        entry.pin.material.opacity = visible
-        entry.stem.material.opacity = visible * 0.75
-        const show = visible > 0.02
-        entry.sprite.visible = show
-        entry.ring.visible = show
-        entry.pin.visible = show
-        entry.stem.visible = show
-        i += 1
+        entry.hit.scale.setScalar(scale)
+        entry.sprite.material.opacity = visible * 0.95 * dim
+        entry.sprite.visible = visible > 0.02
       })
     }
 
     if (layers.polaroid.visible && polaroidEntries.size > 0) {
       let i = 0
       polaroidEntries.forEach((entry) => {
+        const emphasis = emphasisFor(entry.descriptor)
+        const dim = emphasis === 'dimmed' ? 0.45 : 1
         const visible = facingFade(entry.anchor)
         const bob = motion ? 1 + Math.sin(now * 0.0014 * animation + i * 1.7) * 0.018 : 1
         // the plane is already built at card size, so the scale here is only
         // the marker profile times the user's per-card scale
-        const s = scale * entry.scale
+        const s = scale * entry.scale * (emphasis === 'selected' ? 1.2 : 1)
         entry.mesh.position.copy(entry.anchor).multiplyScalar(bob)
         entry.mesh.scale.set(s, s, 1)
-        entry.mesh.material.opacity = visible * 0.97
-        entry.stem.material.opacity = visible * 0.5
+        entry.mesh.material.opacity = visible * 0.97 * dim
+        entry.stem.material.opacity = visible * 0.5 * dim
         entry.hit.scale.setScalar(s)
         const show = visible > 0.02
         entry.mesh.visible = show
@@ -1223,7 +1123,6 @@ export function createGlobeScene({ container, config }) {
   const api = {
     start() {
       setMode("country")
-      setCenters("all")
       loadCartography()
       raf = requestAnimationFrame(render)
     },
@@ -1248,11 +1147,6 @@ export function createGlobeScene({ container, config }) {
         entry.halo?.material.color.setHex(theme.border)
       })
       analyticsEntries.forEach(paintAnalytics)
-      stickerEntries.forEach((entry) => {
-        entry.ring.material.color.setHex(theme.border)
-        entry.pin.material.color.setHex(theme.border)
-        entry.stem.material.color.setHex(theme.border)
-      })
     },
 
     // ---- halftone calibration -------------------------------------------
@@ -1268,8 +1162,11 @@ export function createGlobeScene({ container, config }) {
 
     // ---- visual profile ---------------------------------------------------
     setGlobeScale(value) {
-      state.globeScale = Number.isFinite(value) ? value : 1
+      state.globeScale = Number.isFinite(value) ? value : 0.7
       applyZoom()
+      // the loop only chases state.zoom while easing, so the preference has to
+      // re-arm it or the slider moves nothing
+      state.easing = true
     },
     setMarkerScale(value) {
       markerScale = Number.isFinite(value) ? value : 1
@@ -1280,7 +1177,7 @@ export function createGlobeScene({ container, config }) {
     setDetail(value) {
       // the profile stores a 0/1/2 step; map it to how much of the cloud lives
       const step = Number.isFinite(value) ? Math.max(0, Math.min(2, Math.round(value))) : 1
-      uniforms.uDetail.value = [0.55, 0.78, 1][step]
+      uniforms.uDetail.value = [0.7, 0.9, 1][step]
     },
     setMotion(enabled) {
       motion = Boolean(enabled)
@@ -1290,11 +1187,19 @@ export function createGlobeScene({ container, config }) {
       }
     },
 
-    setMode,
-    setWeather,
+    setMode(next) {
+      setMode(next)
+      // a layer swap always clears transient emphasis: hover belongs to the
+      // old layer and selection is re-asserted by the card lifecycle.
+      hoveredDesc = null
+    },
+    setHoverHighlight(descriptor) {
+      hoveredDesc = descriptor ?? null
+    },
+    setSelected(descriptor) {
+      selectedDesc = descriptor ?? null
+    },
     setAnalytics,
-    setCenters,
-    setStickers,
     setPolaroids,
 
     setDragging(on) {
@@ -1325,7 +1230,7 @@ export function createGlobeScene({ container, config }) {
     zoomBy(delta) {
       state.locked = true
       state.easing = true
-      state.ratio = (state.zoom + delta) / state.fit / state.globeScale
+      state.ratio = ((state.zoom + delta) * state.globeScale) / state.fit
       applyZoom()
     },
 
@@ -1358,7 +1263,6 @@ export function createGlobeScene({ container, config }) {
       return {
         quaternion: globe.quaternion.clone(),
         ratio: state.ratio,
-        globeScale: state.globeScale,
         autoRotate: state.autoRotate,
         locked: state.locked,
       }
@@ -1367,8 +1271,9 @@ export function createGlobeScene({ container, config }) {
     restore(saved) {
       if (!saved) return
       state.target = saved.quaternion.clone()
+      // globeScale is deliberately absent: it is a preference, not part of the
+      // framing, so closing a card must never undo the slider
       state.ratio = saved.ratio
-      state.globeScale = saved.globeScale ?? 1
       state.inertia = 0
       state.locked = saved.locked
       state.easing = true

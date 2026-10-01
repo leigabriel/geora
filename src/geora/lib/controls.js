@@ -1,9 +1,9 @@
 // Pointer, wheel and pinch gestures on the globe canvas.
 //
-// Selection is resolved on release, not on press, so a drag never selects. A
-// release is one of three things: a marker, bare sphere (which is where a sticker
-// or photo gets pinned), or empty space, which clears the open card.
-export function bindControls({ scene, audio, onHover, onSelect, onSphere, onClear }) {
+// Selection is resolved on release, not on press, so a drag never selects. Every
+// marker is declared in code, so a release is one of two things: a marker, or the
+// bare sphere, which carries no selection and dismisses the open card.
+export function bindControls({ scene, audio, onHover, onSelect, onSphere }) {
   let dragging = false
   let moved = 0
   let last = { x: 0, y: 0 }
@@ -67,10 +67,7 @@ export function bindControls({ scene, audio, onHover, onSelect, onSphere, onClea
 
     if (overChrome(event.target)) return
     const hit = scene.probe(event.clientX, event.clientY)
-    if (!hit) {
-      onClear?.(event.clientX, event.clientY)
-      return
-    }
+    if (!hit) return
     if (hit.hit === "marker") {
       onSelect?.(hit.descriptor, event.clientX, event.clientY)
       return
