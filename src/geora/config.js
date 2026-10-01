@@ -1,7 +1,6 @@
 import { COUNTRIES_DATA } from './data/countries.js'
-import { AI_CENTERS, CENTER_TIERS } from './data/centers.js'
-import { STICKERS } from './data/stickers.js'
-import { weatherGlyph, wmoLabel } from './data/weather.js'
+import { AI_CENTERS, CENTER_STATUSES } from './data/centers.js'
+import { buildPolaroids } from './data/landmarks.js'
 import { THEMES, THEME_KEYS, nextTheme } from './lib/themes.js'
 import { MODES, modeMeta, step } from './lib/modes.js'
 import { METRICS, metricMeta, buildAnalytics, metricRange, normalizeMetric, rankCodes, rankShare, worldIndex } from './lib/analytics.js'
@@ -14,22 +13,19 @@ import { METRICS, metricMeta, buildAnalytics, metricRange, normalizeMetric, rank
 //
 // {
 //   places:   [{ code, iso2, name, country, region, lat, lon, pop, tz, curr, fact }],
-//   centers:  [{ id, name, code, lat, lon, tier, weight, accelerators, powerMW, focus }],
-//   stickers: [{ id, glyph, label }],
+//   centers:  [{ id, name, operator, code, lat, lon, tier, powerGW, status, focus }],
+//   landmarks:[{ iso2, caption, lat, lon }],
 //   modes:    [{ key, label, icon, hint }],
 //   themes:   { key: { label, bg, fg, border, scan, body } },
 // }
 export const config = {
   places: COUNTRIES_DATA,
   centers: AI_CENTERS,
-  centerTiers: CENTER_TIERS,
-  stickers: STICKERS,
+  centerStatuses: CENTER_STATUSES,
   modes: MODES,
   themes: THEMES,
   themeKeys: THEME_KEYS,
   metrics: METRICS,
-  weatherGlyph,
-  wmoLabel,
   modeMeta,
   step,
   nextTheme,
@@ -42,15 +38,13 @@ export const config = {
   worldIndex,
   defaultMode: 'country',
   defaultMetric: 'traffic',
-  defaultCenterTier: 'all',
-  // seeded values for the persisted preference blocks
-  halftone: { density: 0.62, scale: 1, contrast: 1, threshold: 0.42, intensity: 1, ambient: 0.55, ocean: 0.45 },
-  profile: { globeScale: 1, markerScale: 1, detail: 1, animation: 1, motion: true },
-  defaultTheme: THEME_KEYS[0],
-  // how often the live weather layer refetches, in minutes
-  weatherIntervalMinutes: 15,
-  // persisted user preferences live under this key
-  storageKey: 'geora:prefs:v1',
+  buildPolaroids,
+  // seeded values for the persisted preference blocks: dense by default
+  halftone: { density: 1.0, scale: 1.0, contrast: 1.0, threshold: 0.400, intensity: 1.0, ambient: 0.2, ocean: 1.0 },
+  profile: { globeScale: 0.7, markerScale: 0.75, detail: 2, animation: 1, motion: true },
+  defaultTheme: 'paper',
+  // persisted user preferences live under this key (v3 reseeds globe scale 0.7)
+  storageKey: 'geora:prefs:v3',
 }
 
 export { MODE_KEYS } from './lib/modes.js'

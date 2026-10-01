@@ -4,10 +4,8 @@ import Flag from './Flag.jsx'
 
 const TAGS = {
   country: 'BEACON',
-  weather: 'CONDITIONS',
   center: 'AI CENTER',
   analytics: 'TELEMETRY',
-  sticker: 'STICKER',
   polaroid: 'PHOTO',
 }
 
@@ -20,22 +18,21 @@ export default function BeaconTooltip({ hover }) {
   const place = target.place ?? null
   const tag = TAGS[target.kind] ?? TAGS.country
   const headline =
-    target.kind === 'country' ? place?.country : (target.sticker?.name ?? target.photo?.caption ?? target.center?.name)
+    target.kind === 'country' ? place?.country : (target.photo?.caption ?? target.center?.name)
   const detail =
     target.kind === 'country'
       ? place?.name
-      : target.kind === 'sticker'
-        ? target.sticker?.name
-        : target.kind === 'polaroid'
-          ? target.photo?.caption
-          : tag
+      : target.kind === 'polaroid'
+        ? (target.photo?.country ?? tag)
+        : tag
 
   return (
     <div
       ref={ref}
       style={style}
       data-beacon-tooltip
-      className="bit-panel pointer-events-none fixed z-30 rounded-xl border px-2.5 py-1.5 shadow-xl"
+      aria-hidden="true"
+      className="bit-panel pointer-events-none fixed z-30 max-w-[min(16rem,calc(100vw-2rem))] rounded-xl border px-2 py-1 shadow-lg"
     >
       <div className="flex items-center gap-2">
         {place ? <Flag place={place} className="h-5 w-7" /> : <span className="h-5 w-7 shrink-0" />}

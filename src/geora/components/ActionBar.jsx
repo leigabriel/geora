@@ -1,179 +1,102 @@
-// Per-selection tools, shown as framed groups in the dock above the selection
-// navigation. Every group sits in its own box so a tap target has a visible
-// boundary, and the active choice fills its box instead of only recolouring
-// type. Anything that belongs to a specific place lives in that place's card.
-export default function ActionBar({
-  mode,
-  config,
-  armed,
-  onArm,
-  onAddStickerImage,
-  onClearStickers,
-  onClearPhotos,
-  stickers,
-  photos,
-  scale,
-  onScale,
-  metric,
-  onMetric,
-  analytics,
-  tier,
-  onTier,
-  units,
-  onUnits,
-  onRefreshWeather,
-  weatherBusy,
-  weather,
-  weatherAt,
-  weatherError,
-  pendingPhoto,
-}) {
-  const armedSticker = config.stickers.find((item) => item.id === armed) ?? null
+// The readout in the dock above the layer console: it reports what the running
+// layer holds and nothing else. There are deliberately no pickers, steppers or
+// buttons here — the content of each layer and the metric analytics is scored by
+// are declared in config.js, so the interface is never a second place to
+// configure them. One instruction at a time, one shared box system from ./ui.jsx.
+import { Box, Label } from './ui.jsx'
 
+export default function ActionBar({ mode, config, analytics }) {
   return (
-    <div data-ui className="pointer-events-none flex w-full flex-col items-center gap-1.5">
+    <div data-ui key={mode} className="mode-swap pointer-events-none flex w-full flex-col items-center gap-1.5">
       {mode === 'country' && (
         <Box tone="quiet">
           <Label className="opacity-70">{config.modes[0].hint}</Label>
         </Box>
       )}
 
-      {mode === 'sticker' && (
-        <>
-          <Box>
-            <div className="flex max-w-[22rem] flex-wrap items-center justify-center gap-1">
-              {config.stickers.map((sticker) => (
-                <button
-                  key={sticker.id}
-                  type="button"
-                  onClick={() => onArm(sticker.id)}
-                  title={sticker.label}
-                  aria-pressed={armed === sticker.id}
-                  data-pressed={armed === sticker.id ? 'true' : 'false'}
-                  className="hud-btn pointer-events-auto text-[17px] leading-none"
-                >
-                  {sticker.glyph}
-                </button>
-              ))}
-            </div>
-          </Box>
-
-          <Box tone={armed ? 'live' : 'quiet'}>
-            <Label>
-              {armed ? (
-                <>
-                  Tap the globe to pin
-                  <span className="ml-1.5 font-bold text-(--accent-color)">
-                    {armedSticker ? armedSticker.label : 'your image'}
-                  </span>
-                </>
-              ) : (
-                'Pick a sticker, then tap the globe'
-              )}
-            </Label>
-          </Box>
-
-          <Box>
-            <Action onClick={onAddStickerImage}>Add image</Action>
-            <Separator />
-            <Size scale={scale} onScale={onScale} />
-            <Separator />
-            <Action onClick={onClearStickers} disabled={!stickers.length}>
-              {stickers.length ? `Clear ${stickers.length}` : 'Clear'}
-            </Action>
-            <Separator />
-            <Label opacity>{stickers.length} pinned</Label>
-          </Box>
-        </>
-      )}
-
-      {mode === 'polaroid' && (
-        <>
-          <Box tone={pendingPhoto ? 'live' : 'quiet'}>
-            <Label>
-              {pendingPhoto ? (
-                <>
-                  Photo to
-                  <span className="ml-1.5 font-bold text-(--accent-color)">
-                    {pendingPhoto.place ? pendingPhoto.place.country : 'this spot'}
-                  </span>
-                  <span className="ml-1.5 opacity-70">· choose a file</span>
-                </>
-              ) : (
-                'Tap an island on the globe to add a photo'
-              )}
-            </Label>
-          </Box>
-
-          <Box>
-            <Size scale={scale} onScale={onScale} />
-            <Separator />
-            <Action onClick={onClearPhotos} disabled={!photos.length}>
-              {photos.length ? `Clear ${photos.length}` : 'Clear'}
-            </Action>
-            <Separator />
-            <Label opacity>{photos.length} pinned</Label>
-          </Box>
-        </>
-      )}
+      {mode === 'polaroid' && <Polaroids config={config} photos={config.buildPolaroids(config.places)} />}
 
       {mode === 'analytics' && analytics && (
         <>
-          <Gauge config={config} analytics={analytics} metric={metric} onMetric={onMetric} />
-          <Rank metric={metric} analytics={analytics} config={config} />
+          <Gauge config={config} analytics={analytics} />
+          <Rank analytics={analytics} config={config} />
         </>
       )}
 
-      {mode === 'centers' && (
-        <>
-          <Box>
-            <Label opacity>{config.centers.length} sites</Label>
-            <Separator />
-            <Choices
-              value={tier}
-              onPick={onTier}
-              items={config.centerTiers.map((item) => ({ key: item.key, label: item.label }))}
-            />
-          </Box>
-          <Box tone="quiet">
-            <Label className="opacity-70">Tap a beacon to inspect a campus</Label>
-          </Box>
-        </>
-      )}
+      {mode === 'centers' && <Centers config={config} />}
+    </div>
+  )
+}
 
-      {mode === 'weather' && (
-        <>
-          <Box tone={weatherError ? 'quiet' : 'live'}>
-            <span
-              className={`text-[10px] font-bold uppercase tracking-[0.16em] ${
-                weatherError ? 'font-bold' : 'font-bold text-(--accent-color)'
+// What the bundled photograph set contains: how many nations have a picture, and
+// where each one is pinned. Nothing here can be changed without editing
+// data/landmarks.js and re-running npm run landmarks.
+function Polaroids({ config, photos }) {
+  const meta = config.modeMeta('polaroid')
+  return (
+    <>
+      <Box className="w-full max-w-88" title="One photograph per nation, downloaded to public/landmarks by scripts/cache-landmarks.mjs.">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between gap-3">
+            <Label opacity>Nations</Label>
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-(--accent-color)">
+              {photos.length}
+            </span>
+          </div>
+          <div className="flex items-center justify-between gap-3 border-t border-(--border-color) pt-1.5">
+            <Label opacity>Source</Label>
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] opacity-70">Wikipedia</span>
+          </div>
+          <div className="flex items-center justify-between gap-3 border-t border-(--border-color) pt-1.5">
+            <Label opacity>Pinned at</Label>
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] opacity-70">The landmark</span>
+          </div>
+        </div>
+      </Box>
+
+      <Box tone="quiet">
+        <Label className="opacity-70">{meta.hint}</Label>
+      </Box>
+    </>
+  )
+}
+
+// The campus tally, split by how far each announcement has actually got: running,
+// under construction, or announced and not yet built.
+function Centers({ config }) {
+  const counts = new Map(config.centerStatuses.map((status) => [status.key, 0]))
+  for (const center of config.centers) counts.set(center.status, (counts.get(center.status) ?? 0) + 1)
+
+  return (
+    <>
+      <Box className="w-full max-w-88">
+        <div className="flex flex-col gap-1.5">
+          {config.centerStatuses.map((status, index) => (
+            <div
+              key={status.key}
+              className={`flex items-center justify-between gap-3 ${
+                index ? 'border-t border-(--border-color) pt-1.5' : ''
               }`}
             >
-              {weatherError ? 'Unavailable' : weatherBusy ? 'Loading' : 'Live'}
+              <Label opacity>{status.label}</Label>
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-(--accent-color)">
+                {counts.get(status.key) ?? 0}
+              </span>
+            </div>
+          ))}
+          <div className="flex items-center justify-between gap-3 border-t border-(--border-color) pt-1.5">
+            <Label opacity>Total</Label>
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] opacity-70">
+              {config.centers.length}
             </span>
-            <Separator />
-            <Label opacity>
-              {weatherError || `${Object.keys(weather).length} readings · open-meteo`}
-              {weatherAt ? ` · ${weatherAt}` : ''}
-            </Label>
-          </Box>
-          <Box>
-            <Choices
-              value={units}
-              onPick={onUnits}
-              items={[
-                { key: 'c', label: '°C' },
-                { key: 'f', label: '°F' },
-              ]}
-            />
-            <Separator />
-            <Action onClick={onRefreshWeather} disabled={weatherBusy}>
-              Refresh
-            </Action>
-          </Box>
-        </>
-      )}
-    </div>
+          </div>
+        </div>
+      </Box>
+
+      <Box tone="quiet">
+        <Label className="opacity-70">{config.modeMeta('centers').hint}</Label>
+      </Box>
+    </>
   )
 }
 
@@ -182,16 +105,17 @@ function format(value, meta) {
   return `${value.toFixed(meta.decimals)} ${meta.unit}`
 }
 
-// The world reading: a ring that draws itself to a percentage, next to the
-// value it describes and the switch that chooses which value that is, all in
-// one framed block.
-function Gauge({ config, analytics, metric, onMetric }) {
+// The world reading: a ring that draws itself to a percentage, next to the value
+// it describes. The metric is config.defaultMetric rather than a switch, because
+// choosing one at runtime would be configuration living in the interface.
+function Gauge({ config, analytics }) {
+  const metric = config.defaultMetric
   const index = config.worldIndex(analytics, metric)
   const meta = config.metricMeta(metric)
   const total = analytics.totals[metric]
 
   return (
-    <Box className="w-full max-w-[22rem]" title={index.note}>
+    <Box className="w-full max-w-88" title={index.note}>
       <div className="flex items-center gap-3">
         <Ring percent={index.percent} />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -204,15 +128,6 @@ function Gauge({ config, analytics, metric, onMetric }) {
           <span className="text-[9px] font-bold uppercase tracking-[0.14em] opacity-60" title={index.note}>
             {index.label} · {index.percent}%
           </span>
-          <Choices
-            value={metric}
-            onPick={onMetric}
-            items={config.metrics.map((item) => ({
-              key: item.key,
-              label: item.label,
-              title: `${item.label} (${item.higherIsBetter ? 'higher is better' : 'lower is better'})`,
-            }))}
-          />
         </div>
       </div>
     </Box>
@@ -253,7 +168,8 @@ function Ring({ percent, size = 44 }) {
 
 // Ranked read-out as a bar chart: the fill is the distance to the leader and
 // the badge repeats it as a number, so the graph reads with colour and text.
-function Rank({ metric, analytics, config }) {
+function Rank({ analytics, config }) {
+  const metric = config.defaultMetric
   const ranked = config.rankCodes(analytics, metric)
   const meta = config.metricMeta(metric)
   const best = ranked[0]?.value
@@ -262,7 +178,7 @@ function Rank({ metric, analytics, config }) {
 
   return (
     <Box
-      className="w-full max-w-[22rem]"
+      className="w-full max-w-88"
       title="There is no geora backend. These numbers are modeled from population, timezone and a hash of each country code."
     >
       <div className="mb-1 flex items-center justify-between">
@@ -298,95 +214,5 @@ function Rank({ metric, analytics, config }) {
       </div>
       <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] opacity-45">Modeled, not measured</p>
     </Box>
-  )
-}
-
-function Box({ children, className = '', tone = 'default', title }) {
-  const surface =
-    tone === 'live' ? 'bg-(--accent-subtle)' : tone === 'quiet' ? 'bg-transparent' : 'bg-(--card-bg)'
-  return (
-    <div
-      title={title}
-      data-tone={tone}
-      className={`pointer-events-none rounded-xl border border-(--border-color) px-2.5 py-1.5 ${surface} ${className}`}
-    >
-      {children}
-    </div>
-  )
-}
-
-function Label({ children, opacity, className = '' }) {
-  return (
-    <span
-      className={`text-[10px] font-bold uppercase tracking-[0.16em] ${opacity ? 'opacity-60' : ''} ${className}`}
-    >
-      {children}
-    </span>
-  )
-}
-
-function Choices({ items, value, onPick }) {
-  return (
-    <span className="flex flex-wrap items-center justify-center gap-1">
-      {items.map((item) => (
-        <button
-          key={item.key}
-          type="button"
-          onClick={() => onPick(item.key)}
-          title={item.title ?? item.label}
-          aria-pressed={value === item.key}
-          data-pressed={value === item.key ? 'true' : 'false'}
-          className="hud-btn pointer-events-auto text-[10px] font-bold uppercase tracking-[0.14em]"
-        >
-          {item.label}
-        </button>
-      ))}
-    </span>
-  )
-}
-
-function Action({ children, onClick, disabled }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="hud-btn pointer-events-auto text-[10px] font-bold uppercase tracking-[0.14em] disabled:opacity-30"
-    >
-      {children}
-    </button>
-  )
-}
-
-function Separator() {
-  return (
-    <span aria-hidden="true" className="px-1 text-[10px] opacity-35">
-      ·
-    </span>
-  )
-}
-
-function Size({ scale, onScale }) {
-  return (
-    <span className="flex items-center gap-0.5">
-      <Label opacity>Size</Label>
-      <button
-        type="button"
-        onClick={() => onScale(Math.max(0.4, Math.round((scale - 0.2) * 10) / 10))}
-        aria-label="Smaller"
-        className="hud-btn pointer-events-auto px-1.5 text-[11px] font-bold"
-      >
-        −
-      </button>
-      <span className="w-8 text-center text-[10px] font-bold text-(--accent-color)">{scale.toFixed(1)}x</span>
-      <button
-        type="button"
-        onClick={() => onScale(Math.min(2.4, Math.round((scale + 0.2) * 10) / 10))}
-        aria-label="Larger"
-        className="hud-btn pointer-events-auto px-1.5 text-[11px] font-bold"
-      >
-        +
-      </button>
-    </span>
   )
 }
