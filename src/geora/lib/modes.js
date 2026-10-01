@@ -3,11 +3,9 @@
 // layer in the engine is all it takes to extend the globe.
 export const MODES = [
   { key: 'country', label: 'COUNTRIES', icon: 'fa-earth-americas', hint: 'Tap a beacon to inspect a nation' },
-  { key: 'sticker', label: 'STICKERS', icon: 'fa-star', hint: 'Arm a sticker, then tap the globe to pin it' },
-  { key: 'polaroid', label: 'POLAROIDS', icon: 'fa-image', hint: 'Tap an island to add a photo there' },
+  { key: 'polaroid', label: 'POLAROIDS', icon: 'fa-image', hint: 'One landmark per nation, pinned where it stands' },
   { key: 'analytics', label: 'ANALYTICS', icon: 'fa-chart-column', hint: 'Modeled telemetry per nation' },
-  { key: 'centers', label: 'AI CENTERS', icon: 'fa-server', hint: 'AI compute campuses' },
-  { key: 'weather', label: 'WEATHER', icon: 'fa-cloud-sun', hint: 'Live conditions, nothing shown if unavailable' },
+  { key: 'centers', label: 'AI CENTERS', icon: 'fa-server', hint: 'Announced AI compute campuses' },
 ]
 
 export const MODE_KEYS = MODES.map((mode) => mode.key)
