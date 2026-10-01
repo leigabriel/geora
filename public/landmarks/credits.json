@@ -1,0 +1,402 @@
+[
+  {
+    "iso2": "jp",
+    "file": "public/landmarks/jp.jpg",
+    "title": "Mount Fuji",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/View_of_Mount_Fuji_from_%C5%8Cwakudani_20211202.jpg/1280px-View_of_Mount_Fuji_from_%C5%8Cwakudani_20211202.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Suicasmo",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "ph",
+    "file": "public/landmarks/ph.jpg",
+    "title": "Mayon",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Mount_Mayon_Cagsawa_field_view_close-up_%28Busay%2C_Daraga%2C_Albay%3B_04-21-2023%29.jpg/1280px-Mount_Mayon_Cagsawa_field_view_close-up_%28Busay%2C_Daraga%2C_Albay%3B_04-21-2023%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Patrickroque01",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "cn",
+    "file": "public/landmarks/cn.jpg",
+    "title": "Great Wall of China",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/The_Great_Wall_of_China_at_Jinshanling-edit.jpg/1280px-The_Great_Wall_of_China_at_Jinshanling-edit.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Severin.stalder",
+    "license": "CC BY-SA 3.0"
+  },
+  {
+    "iso2": "in",
+    "file": "public/landmarks/in.jpg",
+    "title": "Taj Mahal",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1d/Taj_Mahal_%28Edited%29.jpeg/1280px-Taj_Mahal_%28Edited%29.jpeg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Yann ; edited by Jim Carter",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "kr",
+    "file": "public/landmarks/kr.jpg",
+    "title": "Gyeongbokgung",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/%EA%B4%91%ED%99%94%EB%AC%B8_%EC%9B%94%EB%8C%80.jpg/1280px-%EA%B4%91%ED%99%94%EB%AC%B8_%EC%9B%94%EB%8C%80.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "서울관광 아카이브",
+    "license": "KOGL Type 1"
+  },
+  {
+    "iso2": "id",
+    "file": "public/landmarks/id.jpg",
+    "title": "Borobudur",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/25/Pradaksina.jpg/1280px-Pradaksina.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Heri nugroho",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "sg",
+    "file": "public/landmarks/sg.jpg",
+    "title": "Marina Bay Sands",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c7/Marina_Bay_Sands_%28I%29.jpg/1280px-Marina_Bay_Sands_%28I%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "This Photo was taken by Supanut Arunoprayote . Feel free to use any of my images, but please mention me as the author and may send me a message. (สามารถใช้ภาพได้อิสระ แต่กรุณาใส่เครดิตผู้ถ่ายและอาจส่ง ข้อความบอกกล่าวด้วย ) Please do not upload an updated image here without consultation with the Author. The author would like to make corrections only at his own source. This ensures that the changes are preserved. Please if you think that any changes should be required, please inform the author. Otherwise you can upload a new image with a new name. Please use one of the templates derivative or extract .",
+    "license": "CC BY 4.0"
+  },
+  {
+    "iso2": "th",
+    "file": "public/landmarks/th.jpg",
+    "title": "Grand Palace",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c7/0005574_-_Wat_Phra_Kaew_006.jpg/1280px-0005574_-_Wat_Phra_Kaew_006.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Preecha.MJ",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "vn",
+    "file": "public/landmarks/vn.jpg",
+    "title": "Hạ Long Bay",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Ha_Long_Bay_in_2019.jpg/1280px-Ha_Long_Bay_in_2019.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Taewangkorea",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "my",
+    "file": "public/landmarks/my.jpg",
+    "title": "Mount Kinabalu",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/Kinabalu_Sabah_Borneo_Kampong_Kundasang_panorama_2.jpg/1280px-Kinabalu_Sabah_Borneo_Kampong_Kundasang_panorama_2.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "kallerna",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "pk",
+    "file": "public/landmarks/pk.jpg",
+    "title": "Badshahi Mosque",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/Badshahi_Mosque_front_picture.jpg/1280px-Badshahi_Mosque_front_picture.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Romero Maia",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "sa",
+    "file": "public/landmarks/sa.jpg",
+    "title": "Al-Ula",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Al_Ula_%286748577917%29.jpg/1280px-Al_Ula_%286748577917%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Sammy Six",
+    "license": "CC BY 2.0"
+  },
+  {
+    "iso2": "ae",
+    "file": "public/landmarks/ae.jpg",
+    "title": "Burj Khalifa",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Burj_Khalifa_%28worlds_tallest_building%29_and_the_Dubai_skyline_%2825781049892%29.jpg/1280px-Burj_Khalifa_%28worlds_tallest_building%29_and_the_Dubai_skyline_%2825781049892%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "imran shahabuddin",
+    "license": "CC BY 2.0"
+  },
+  {
+    "iso2": "gb",
+    "file": "public/landmarks/gb.jpg",
+    "title": "Tower Bridge",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/59/Tower_Bridge_at_Dawn.jpg/1280px-Tower_Bridge_at_Dawn.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Fuzzypiggy",
+    "license": "CC BY-SA 3.0"
+  },
+  {
+    "iso2": "fr",
+    "file": "public/landmarks/fr.jpg",
+    "title": "Eiffel Tower",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/1280px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Benh LIEU SONG",
+    "license": "Public domain"
+  },
+  {
+    "iso2": "de",
+    "file": "public/landmarks/de.jpg",
+    "title": "Neuschwanstein Castle",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/Schloss_Neuschwanstein_2013.jpg/1280px-Schloss_Neuschwanstein_2013.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Thomas Wolf , www.foto-tw.de",
+    "license": "CC BY-SA 3.0 de"
+  },
+  {
+    "iso2": "it",
+    "file": "public/landmarks/it.jpg",
+    "title": "Colosseum",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Colosseo_2020.jpg/1280px-Colosseo_2020.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "FeaturedPics",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "es",
+    "file": "public/landmarks/es.jpg",
+    "title": "Sagrada Família",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/SF_maig_2_cropped.jpg/960px-SF_maig_2_cropped.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Canaan",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "gr",
+    "file": "public/landmarks/gr.jpg",
+    "title": "Acropolis of Athens",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2c/1029_Acropolis_of_Athens_in_Greece_at_night_Photo_by_Giles_Laurent.jpg/1280px-1029_Acropolis_of_Athens_in_Greece_at_night_Photo_by_Giles_Laurent.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Giles Laurent",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "se",
+    "file": "public/landmarks/se.jpg",
+    "title": "Vasa Museum",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/43/Stockholm_Vasa_Museum_and_Nordic_Museum_09.jpg/1280px-Stockholm_Vasa_Museum_and_Nordic_Museum_09.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Ad Meskens",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "no",
+    "file": "public/landmarks/no.jpg",
+    "title": "Preikestolen",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Lyse_Fjord_et_Preikestolen.jpg/1280px-Lyse_Fjord_et_Preikestolen.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Clementp.fr",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "nl",
+    "file": "public/landmarks/nl.jpg",
+    "title": "Rijksmuseum",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/South_facade_of_the_Rijksmuseum_Amsterdam_%28DSCF0528%29.jpg/1280px-South_facade_of_the_Rijksmuseum_Amsterdam_%28DSCF0528%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Trougnouf (Benoit Brummer)",
+    "license": "CC BY 4.0"
+  },
+  {
+    "iso2": "ch",
+    "file": "public/landmarks/ch.jpg",
+    "title": "Matterhorn",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Matterhorn_from_Domh%C3%BCtte_-_2.jpg/1280px-Matterhorn_from_Domh%C3%BCtte_-_2.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Photo: chil, on Camptocamp.org Derivative work: Zacharie Grossen",
+    "license": "CC BY-SA 3.0"
+  },
+  {
+    "iso2": "pl",
+    "file": "public/landmarks/pl.jpg",
+    "title": "Wawel Castle",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Wawel_%284%29.jpg/1280px-Wawel_%284%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Monika Towiańska",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "ua",
+    "file": "public/landmarks/ua.jpg",
+    "title": "Saint Sophia Cathedral, Kyiv",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/80-391-0151_Kyiv_St.Sophia%27s_Cathedral_RB_18_2_%28cropped%29.jpg/1280px-80-391-0151_Kyiv_St.Sophia%27s_Cathedral_RB_18_2_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Rbrechko",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "pt",
+    "file": "public/landmarks/pt.jpg",
+    "title": "Belém Tower",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Torre_Bel%C3%A9m_April_2009-4a.jpg/1280px-Torre_Bel%C3%A9m_April_2009-4a.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Alvesgaspar",
+    "license": "CC BY-SA 3.0"
+  },
+  {
+    "iso2": "ie",
+    "file": "public/landmarks/ie.jpg",
+    "title": "Cliffs of Moher",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d1/Cliffs-Of-Moher-OBriens-From-South.JPG/1280px-Cliffs-Of-Moher-OBriens-From-South.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Bjørn Christian Tørrissen",
+    "license": "CC BY-SA 3.0"
+  },
+  {
+    "iso2": "is",
+    "file": "public/landmarks/is.jpg",
+    "title": "Gullfoss",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Gullfoss_from_the_Air_%28cropped%29.jpg/1280px-Gullfoss_from_the_Air_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Nickspix",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "tr",
+    "file": "public/landmarks/tr.jpg",
+    "title": "Hagia Sophia",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4a/Hagia_Sophia_%28228968325%29.jpeg/1280px-Hagia_Sophia_%28228968325%29.jpeg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Adli Wahid",
+    "license": "CC BY-SA 3.0"
+  },
+  {
+    "iso2": "us",
+    "file": "public/landmarks/us.jpg",
+    "title": "Golden Gate Bridge",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bf/Golden_Gate_Bridge_as_seen_from_Battery_East.jpg/1280px-Golden_Gate_Bridge_as_seen_from_Battery_East.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Frank Schulenburg",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "ca",
+    "file": "public/landmarks/ca.jpg",
+    "title": "Niagara Falls",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/3Falls_Niagara.jpg/1280px-3Falls_Niagara.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Saffron Blaze",
+    "license": "CC BY-SA 3.0"
+  },
+  {
+    "iso2": "mx",
+    "file": "public/landmarks/mx.jpg",
+    "title": "Chichen Itza",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Chichen_Itza_3.jpg/1280px-Chichen_Itza_3.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Daniel Schwen",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "br",
+    "file": "public/landmarks/br.jpg",
+    "title": "Christ the Redeemer (statue)",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/Christ_the_Redeemer_-_Cristo_Redentor.jpg/1280px-Christ_the_Redeemer_-_Cristo_Redentor.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Arne Müseler",
+    "license": "CC BY-SA 3.0 de"
+  },
+  {
+    "iso2": "ar",
+    "file": "public/landmarks/ar.jpg",
+    "title": "Perito Moreno Glacier",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/Perito_Moreno_Glacier_2023.jpg/1280px-Perito_Moreno_Glacier_2023.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Fernando",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "cl",
+    "file": "public/landmarks/cl.jpg",
+    "title": "Torres del Paine National Park",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Torres_del_Paine_y_cuernos_del_Paine%2C_montaje.jpg/1280px-Torres_del_Paine_y_cuernos_del_Paine%2C_montaje.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Karen Chan 16 y Miguel.v ( local | logs | global ) (originales), y Jorge Morales Piderit (montaje).",
+    "license": "CC BY 4.0"
+  },
+  {
+    "iso2": "pe",
+    "file": "public/landmarks/pe.jpg",
+    "title": "Machu Picchu",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Machu_Picchu%2C_2023_%28012%29.jpg/1280px-Machu_Picchu%2C_2023_%28012%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Draceane",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "co",
+    "file": "public/landmarks/co.jpg",
+    "title": "Caño Cristales",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/Ca%C3%B1o_Cristales_01.jpg/1280px-Ca%C3%B1o_Cristales_01.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Astromario",
+    "license": "CC BY-SA 3.0"
+  },
+  {
+    "iso2": "cu",
+    "file": "public/landmarks/cu.jpg",
+    "title": "Havana",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/DJI_0197_crp_wiki.jpg/1280px-DJI_0197_crp_wiki.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "RenaatPeeters",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "cr",
+    "file": "public/landmarks/cr.jpg",
+    "title": "Arenal Volcano",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/Arenal_volcano_%2870785p%29_%28cropped%29.jpg/1280px-Arenal_volcano_%2870785p%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Rhododendrites",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "eg",
+    "file": "public/landmarks/eg.jpg",
+    "title": "Giza pyramid complex",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/Pyramids_of_the_Giza_Necropolis.jpg/1280px-Pyramids_of_the_Giza_Necropolis.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "KennyOMG",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "za",
+    "file": "public/landmarks/za.jpg",
+    "title": "Table Mountain",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dc/Table_Mountain_DanieVDM.jpg/1280px-Table_Mountain_DanieVDM.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Danie van der Merwe from Cape Town, South Africa",
+    "license": "CC BY 2.0"
+  },
+  {
+    "iso2": "ke",
+    "file": "public/landmarks/ke.jpg",
+    "title": "Mount Kenya",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/MtKenya.jpg/1280px-MtKenya.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Don Elvis Muraya",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "ng",
+    "file": "public/landmarks/ng.jpg",
+    "title": "Zuma Rock",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/Zuma_Rock.jpg/960px-Zuma_Rock.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Jeff Attaway",
+    "license": "CC BY 2.0"
+  },
+  {
+    "iso2": "ma",
+    "file": "public/landmarks/ma.jpg",
+    "title": "Aït Benhaddou",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/Ksar_A%C3%AFt_Benhaddou%2C_Marocco_%28%D8%A3%D9%8A%D8%AA_%D8%A8%D9%86_%D8%AD%D8%AF%D9%88%D8%8C_%D8%A7%D9%84%D9%85%D8%BA%D8%B1%D8%A8%2C_%E2%B4%B0%E2%B5%A2%E2%B5%9C_%E2%B5%83%E2%B4%B0%E2%B4%B7%E2%B4%B7%E2%B5%93%29.jpg/1280px-Ksar_A%C3%AFt_Benhaddou%2C_Marocco_%28%D8%A3%D9%8A%D8%AA_%D8%A8%D9%86_%D8%AD%D8%AF%D9%88%D8%8C_%D8%A7%D9%84%D9%85%D8%BA%D8%B1%D8%A8%2C_%E2%B4%B0%E2%B5%A2%E2%B5%9C_%E2%B5%83%E2%B4%B0%E2%B4%B7%E2%B4%B7%E2%B5%93%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Petar Milošević",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "et",
+    "file": "public/landmarks/et.jpg",
+    "title": "Lalibela",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/aa/Lalibela%2C_san_giorgio%2C_esterno_24.jpg/1280px-Lalibela%2C_san_giorgio%2C_esterno_24.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Sailko",
+    "license": "CC BY 3.0"
+  },
+  {
+    "iso2": "gh",
+    "file": "public/landmarks/gh.jpg",
+    "title": "Cape Coast Castle",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Cape_Coast_Castle%2C_Cape_Coast%2C_Ghana.JPG/1280px-Cape_Coast_Castle%2C_Cape_Coast%2C_Ghana.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Rjruiziii",
+    "license": "CC BY-SA 3.0"
+  },
+  {
+    "iso2": "au",
+    "file": "public/landmarks/au.jpg",
+    "title": "Uluru",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a8/ULURU.jpg/1280px-ULURU.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Ek2030372672",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "iso2": "nz",
+    "file": "public/landmarks/nz.jpg",
+    "title": "Milford Sound",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b6/Milford_Sound_%28New_Zealand%29.JPG/1280px-Milford_Sound_%28New_Zealand%29.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "Maros M r a z ( Maros )",
+    "license": "CC BY-SA 3.0"
+  },
+  {
+    "iso2": "fj",
+    "file": "public/landmarks/fj.jpg",
+    "title": "Mamanuca Islands",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/Mamanuca.jpg/1280px-Mamanuca.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "American at German Wikipedia",
+    "license": "CC BY-SA 3.0"
+  },
+  {
+    "iso2": "pg",
+    "file": "public/landmarks/pg.jpg",
+    "title": "Owen Stanley Range",
+    "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/OwenStanleyRangeOwersCornerView.jpg/500px-OwenStanleyRangeOwersCornerView.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "artist": "ColinF at English Wikipedia",
+    "license": "CC BY-SA 3.0"
+  }
+]
