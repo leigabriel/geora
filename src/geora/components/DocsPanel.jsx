@@ -13,14 +13,18 @@ const SECTIONS = [
   {
     id: 'install',
     title: 'Installation',
-    body: ['npm install, then npm run dev. Other scripts: npm run build, npm run preview, npm run lint, npm run assets.'],
+    body: [
+      'npm install, then npm run dev. Other scripts: npm run build, npm run preview, npm run lint, npm run assets, npm run landmarks.',
+      'npm run assets caches the flag PNGs and the font. npm run landmarks downloads the polaroid photographs. Both write into public/ and both are only needed after changing the underlying data files.',
+    ],
   },
   {
     id: 'quickstart',
     title: 'Quick Start',
     body: [
-      'The bottom-centre control walks the selections as plain words: previous, active, next. The neighbours name the selection they lead to, so you always know where you are going before you move.',
-      'Tap or click any beacon to open its card. Press Escape to dismiss it. Press H to hide the interface, D to open these docs, and the number keys 1 to 6 to jump to a selection.',
+      'The bottom-centre control is a single pill carrying the running layer. Tap it and the layer list opens above it; pick one and the list closes again. A click anywhere outside the dock, or Escape, dismisses it too. Keys 1 to 4 jump straight to a layer, and the arrow keys step through them in order.',
+      'The panel above the pill is a readout, not a control panel. It reports what the running layer contains and nothing more: there are no pickers, steppers or buttons, because everything a host might want to choose is declared in config.js.',
+      'Tap or click any beacon to open its card. Press Escape to dismiss it. Press H to hide the interface and D to open these docs.',
     ],
   },
   {
@@ -28,16 +32,16 @@ const SECTIONS = [
     title: 'Globe Configuration',
     body: [
       'All content is declared in src/geora/config.js. The engine in lib/scene.js reads only the fields it needs, so a host replaces an array rather than editing a renderer.',
-      'places supplies the geographic anchors every location-based selection is derived from: code, iso2, name, country, region, lat, lon, pop, tz, curr and fact.',
-      'The halftone and visual profile controls are plain numbers pushed into the shader, not hard-coded behaviour.',
+      'places supplies the geographic anchors every location-based layer is derived from: code, iso2, name, country, region, lat, lon, pop, tz, curr and fact.',
+      'centers supplies the AI campuses and landmarks the polaroid photographs, while defaultMetric fixes what the analytics layer is scored by. The halftone and visual profile controls are plain numbers pushed into the shader, not hard-coded behaviour.',
     ],
   },
   {
     id: 'modes',
     title: 'Selection Modes',
     body: [
-      'Six selections ship by default. Each owns one three.js group, so switching swaps the contents of the planet rather than stacking overlays on top of it.',
-      'Number keys 1 to 6 jump directly to a selection. Arrowing left or right steps through them in order.',
+      'Four selections ship by default: countries, polaroids, analytics and AI centers. Each owns one three.js group, so switching swaps the contents of the planet rather than stacking overlays on top of it.',
+      'Number keys 1 to 4 jump directly to a selection. Arrowing left or right steps through them in order.',
     ],
   },
   {
@@ -49,45 +53,32 @@ const SECTIONS = [
     ],
   },
   {
-    id: 'stickers',
-    title: 'Stickers',
-    body: [
-        'Pick a glyph from the palette, or add your own image, then tap the globe to pin it exactly where you tapped. A sticker carries a glyph or an image, a name, its coordinates, the country it landed in, a scale and optional metadata.',
-      'A sticker stays attached to its coordinates as the planet turns. Arming is cleared when you change selection, so a sticker can never be pinned from another mode. Tap a pinned sticker to inspect it, rescale it, or remove it.',
-    ],
-  },
-  {
     id: 'polaroids',
     title: 'Polaroids',
-      body: [
-        'Tap an island: Geora records which nation you hit, opens the file picker, and pins the picture exactly where you tapped. The card carries a caption, the country, coordinates and a scale.',
-        'A tap on open water is refused rather than guessed at, and cancelling the picker drops the country so the next picture cannot land somewhere you abandoned. Selecting a polaroid focuses the globe on where it is attached.',
-      ],
+    body: [
+      'One photograph per nation, of that nation best-known landmark, pinned at the real coordinates of the landmark rather than at its capital. The card names the landmark, the nation and the coordinates, and credits the photographer.',
+      'The set is declared in data/landmarks.js and downloaded into public/landmarks by scripts/cache-landmarks.mjs, which reads each landmark Wikipedia article for both its lead photograph and its coordinates. Attribution for every file is written to public/landmarks/credits.json, since the images are CC BY-SA or public domain.',
+      'There is no upload. Adding a country means adding an entry to landmarks.js and re-running npm run landmarks, so the layer content is versioned with the code rather than living in the browser.',
+      'Selecting a polaroid focuses the globe on the landmark, not on the nation it belongs to.',
+    ],
   },
   {
     id: 'analytics',
     title: 'Analytics',
     body: [
-      'Text-based only. There is no 3D graph: the globe carries a single health beacon per nation whose ring grows with the active metric, and the numbers, labels and ranking live in the toolbar and the card.',
+      'Text-based only. There is no 3D graph: the globe floats the value over each nation, sized by magnitude so a strong reading carries further than a weak one, and the full numbers and ranking live in the readout and the card.',
+      'Each float is white text on a solid black chip. The chip does not follow the theme, deliberately: it reads the same on paper and on a dark globe and never collides with the accent colour the HUD is tuned to.',
       'The bundled dataset is MODELED, not measured. It is derived from population, timezone and a hash of each ISO code, which makes it stable across reloads and plausible in magnitude, but it is not real traffic. Every surface labels it.',
-      'Supply your own buildAnalytics implementation through config to drive the layer from a real backend.',
+      'Supply your own buildAnalytics implementation through config to drive the layer from a real backend. The metric is config.defaultMetric, not a switch in the interface.',
     ],
   },
   {
     id: 'centers',
     title: 'AI Data Centers',
     body: [
-      'AI compute campuses are drawn directly on the globe at their geographic coordinates. Tap one to select it, which identifies its country, zooms to it, and shows the configured information for that site.',
-      'Closing the card restores the previous rotation, zoom and globe state. The wide halo marks a metro hosting more than one site.',
-      'The bundled list is a curated reference with rounded public figures, not an inventory. Replace config.centers with your own.',
-    ],
-  },
-  {
-    id: 'weather',
-    title: 'Weather',
-    body: [
-      'Live readings from open-meteo, refreshed on a configured interval. Nothing is guessed: if a location has no reported value it is simply absent, and if the request fails the layer shows nothing rather than showing something plausible.',
-      'Markers are emoji with a white outline and no other decoration. No text, no tinted card, no background wash.',
+      'AI compute campuses are drawn directly on the globe at their geographic coordinates. Tap one to open a card carrying its operator, country, announced capacity, build status and focus.',
+      'Every entry is a real site named by its operator. Status separates operating from under construction from announced and not yet built, so the layer distinguishes running capacity from press releases. Capacity is the announced figure in gigawatts, and reads Not disclosed where the operator has published none: it is never estimated.',
+      'Closing the card restores the previous rotation, zoom and globe state. The wide halo marks a metro hosting more than one site. Replace config.centers with your own.',
     ],
   },
   {
@@ -100,12 +91,33 @@ const SECTIONS = [
   {
     id: 'profile',
     title: 'Visual Profile',
-    body: ['Globe scale, marker scale, detail level, animation intensity and motion sensitivity. Motion sensitivity off freezes spin, pulses and inertia.'],
+    body: ['Globe scale, marker visibility, detail level, animation intensity and motion sensitivity. Motion sensitivity off freezes spin, pulses and inertia. Globe scale is a size, not a distance: raising it pulls the camera in so the planet really does read bigger. Shipped defaults are Paper White, globe scale 1.00x, marker visibility 0.75x, detail High, animation 1.00x and motion on.'],
   },
   {
     id: 'halftone',
     title: 'Halftone Calibration',
-    body: ['Density, scale, contrast, threshold and intensity, plus the ambient fill and ocean dot weights. Threshold sharpens the dot edge, contrast pivots the terminator, density thins the cloud evenly.'],
+    body: ['Density, dot scale, contrast, threshold and intensity, plus the ambient fill and ocean dot weights. Threshold sharpens the dot edge, contrast pivots the terminator, density thins the cloud evenly. Shipped defaults are density 100%, dot scale 1.00x, contrast 1.00x, threshold 0.400, intensity 1.00x, ambient fill 0.20 and ocean dots 1.00.'],
+  },
+  {
+    id: 'controls',
+    title: 'Controls',
+    body: [
+      'Drag to rotate, scroll or pinch to zoom. Tap a beacon to inspect it. Reset returns to the default view, Spin toggles automatic rotation, and the eye hides the interface without disabling the globe.',
+    ],
+  },
+  {
+    id: 'interaction',
+    title: 'Interaction',
+    body: [
+      'Selection resolves on release so a drag never selects by accident. Tapping bare space dismisses the open card and restores the previous globe position. Every marker is declared in code, so a tap on the globe never creates one.',
+    ],
+  },
+  {
+    id: 'keyboard',
+    title: 'Keyboard Controls',
+    body: [
+      'Keys 1 to 4 jump directly to a layer. Left and right arrows step between layers. H hides or shows the interface. D opens these docs. Escape closes the panels, then dismisses the card.',
+    ],
   },
   {
     id: 'audio',
@@ -120,7 +132,7 @@ const SECTIONS = [
     body: [
       'createGlobeScene({ container, config }) returns the renderer handle. It is deliberately free of Geora-specific content.',
       'start() begins the loop. setMode(key) swaps layers. setTheme(theme) applies a palette. setHalftone({ density, scale, contrast, threshold, intensity, ocean, ambient }) drives the point shader. setGlobeScale, setMarkerScale, setDetail, setAnimationIntensity and setMotion drive the visual profile.',
-      'setAnalytics(analytics, metric), setWeather(byCode), setCenters(filter), setStickers(list) and setPolaroids(list) feed the data layers.',
+      'setAnalytics(analytics, metric) and setPolaroids(list) feed the data layers.',
       'probe(x, y) resolves a tap to a marker or a lat/lon on the sphere. snapshot() and restore(state) bracket a temporary focus so the globe can be handed back exactly as it was.',
       'flyTo(place), reset(), zoomBy(delta), drag(dx, dy), setAutoRotate(on) and dispose() cover navigation and lifecycle.',
     ],
@@ -129,7 +141,8 @@ const SECTIONS = [
     id: 'examples',
     title: 'Examples',
     body: [
-      'Point the globe at your own cities: replace config.places with [{ code, iso2, name, country, lat, lon }] and every location-based selection follows.',
+      'Point the globe at your own cities: replace config.places with [{ code, iso2, name, country, lat, lon }] and every location-based layer follows.',
+      'Ship your own photographs: replace data/landmarks.js, point src at your own images, and drop the credits step.',
       'Drive analytics from a real backend: return the same shape as buildAnalytics, a byCode map plus totals, and label it however your data deserves.',
       'Add a selection: give it a layer in the engine, add it to config.modes, and it appears in the navigation with no other changes.',
     ],
@@ -138,11 +151,25 @@ const SECTIONS = [
     id: 'trouble',
     title: 'Troubleshooting',
     body: [
-      'Weather shows unavailable: the request failed or the network is blocked. Geora shows nothing rather than inventing readings, which is the intended behaviour.',
       'Analytics numbers look unfamiliar: the bundled dataset is modeled. It is labeled MODELED everywhere it appears.',
+      'A polaroid shows a blank paper: the photograph failed to load from public/landmarks. Re-run npm run landmarks.',
       'The globe is blank: WebGL is unavailable in this browser or hardware acceleration is disabled.',
       'Points look wrong: the Natural Earth topology could not be fetched, so the globe fell back to a coarse land outline. Check that dist/assets contains the topology JSON.',
       'A center will not focus: its ISO code is not in config.places, so there is no territory to fly to. The beacon still draws.',
+    ],
+  },
+  {
+    id: 'settings',
+    title: 'Settings',
+    body: [
+      'Display groups theme, globe scale, marker visibility, detail level and halftone calibration. Interaction groups motion sensitivity and animation intensity. Audio groups interface sounds. Preferences persist locally.',
+    ],
+  },
+  {
+    id: 'credits',
+    title: 'Credits',
+    body: [
+      'Geora Globe. Point cloud from Natural Earth 110m, flags from flagcdn, landmark photographs from Wikipedia, audio synthesized with Tone.js. Photographs are CC BY-SA or public domain and credited in public/landmarks/credits.json.',
     ],
   },
 ]
@@ -153,7 +180,7 @@ export default function DocsPanel({ open, onClose }) {
       <div
         data-ui
         onPointerDown={onClose}
-        className={`fixed inset-0 z-[50] bg-black/25 backdrop-blur-[2px] transition-opacity duration-300 ${
+        className={`fixed inset-0 z-50 bg-black/25 backdrop-blur-[2px] transition-opacity duration-300 ${
           open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
         }`}
       />
@@ -161,23 +188,26 @@ export default function DocsPanel({ open, onClose }) {
       <aside
         data-ui
         data-closed={!open}
-        className={`bit-panel slide-right fixed inset-y-0 right-0 z-[60] flex w-[92vw] max-w-[720px] flex-col border-l shadow-2xl sm:w-[min(720px,86vw)] ${
+        role="dialog"
+        aria-modal="true"
+        aria-label="Geora documentation"
+        className={`bit-panel slide-right fixed inset-y-0 right-0 z-60 flex w-[92vw] max-w-170 flex-col border-l shadow-2xl sm:w-[min(680px,86vw)] ${
           open ? '' : 'pointer-events-none'
         }`}
       >
         <header className="flex shrink-0 items-center justify-between gap-3 border-b border-(--border-color) p-4 sm:p-5">
           <div className="flex min-w-0 items-center gap-2.5">
-            <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-(--accent-color)" />
-            <span className="truncate text-xs font-bold uppercase tracking-[0.2em]">Geora Globe Documentation</span>
+            <span className="h-2 w-2 shrink-0 rounded-full bg-(--accent-color)" aria-hidden="true" />
+            <span className="truncate text-xs font-bold uppercase tracking-[0.2em]">Documentation</span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 rounded-lg p-1.5 text-sm opacity-70 transition-colors hover:bg-(--border-color) hover:opacity-100"
+            className="hud-btn min-h-8 min-w-8 shrink-0 p-1.5 text-sm opacity-70"
             title="Close documentation (Esc)"
             aria-label="Close documentation"
           >
-            <i className="fa-solid fa-xmark" />
+            <i className="fa-solid fa-xmark" aria-hidden="true" />
           </button>
         </header>
 
