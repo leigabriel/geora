@@ -1,6 +1,6 @@
 {
   "name": "geora-globe",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Framework-agnostic halftone globe: a Three.js web component with themes, layers, markers and modeled analytics.",
   "license": "MIT",
   "author": "Lei Gabriel",
