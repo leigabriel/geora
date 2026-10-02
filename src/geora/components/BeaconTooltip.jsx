@@ -32,7 +32,7 @@ export default function BeaconTooltip({ hover }) {
       style={style}
       data-beacon-tooltip
       aria-hidden="true"
-      className="bit-panel pointer-events-none fixed z-30 max-w-[min(16rem,calc(100vw-2rem))] rounded-xl border px-2 py-1 shadow-lg"
+      className="bit-panel pointer-events-none fixed z-30 max-w-[min(16rem,calc(100vw-2rem))] border px-2 py-1 shadow-lg"
     >
       <div className="flex items-center gap-2">
         {place ? <Flag place={place} className="h-5 w-7" /> : <span className="h-5 w-7 shrink-0" />}
@@ -40,7 +40,7 @@ export default function BeaconTooltip({ hover }) {
           <div className="flex items-center gap-1.5">
             <span className="truncate text-[12px] font-bold">{headline}</span>
             {place ? (
-              <span className="rounded bg-(--border-color) px-1 py-0.5 font-readout text-[11px] font-bold text-(--accent-color)">
+              <span className="bg-(--border-color) px-1 py-0.5 font-readout text-[11px] font-bold text-(--accent-color)">
                 {place.code}
               </span>
             ) : null}
