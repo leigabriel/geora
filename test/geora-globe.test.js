@@ -43,6 +43,25 @@ describe("GeoraGlobe defaults", () => {
   })
 })
 
+describe("GeoraGlobe marker visibility", () => {
+  it("keeps markers visible in minimal mode", () => {
+    const { globe, scene } = mount({ minimal: true })
+    expect(scene.last("setMarkersVisible").args[0]).toBe(true)
+    globe.minimal = false
+    expect(scene.last("setMarkersVisible").args[0]).toBe(true)
+    globe.destroy()
+  })
+
+  it("follows showMarkers regardless of minimal", () => {
+    const { globe, scene } = mount({ minimal: true })
+    globe.showMarkers = false
+    expect(scene.last("setMarkersVisible").args[0]).toBe(false)
+    globe.showMarkers = true
+    expect(scene.last("setMarkersVisible").args[0]).toBe(true)
+    globe.destroy()
+  })
+})
+
 describe("GeoraGlobe configuration", () => {
   it("switches themes by key and by object", () => {
     const { globe, scene } = mount()

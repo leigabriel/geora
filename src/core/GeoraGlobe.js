@@ -357,7 +357,7 @@ export class GeoraGlobe extends EventTarget {
     scene.setDetail(this.#profile.detail)
     scene.setAnimationIntensity(this.#profile.animation)
     scene.setShowBorders(this.#showBorders)
-    scene.setMarkersVisible(this.#showMarkers && !this.#minimal)
+    scene.setMarkersVisible(this.#showMarkers)
     scene.setMode(this.#mode)
     scene.setAutoRotate(Boolean(this.#spinning) && this.#motionEnabled())
     this.#applyMotion()
@@ -774,7 +774,7 @@ export class GeoraGlobe extends EventTarget {
 
   set showMarkers(value) {
     this.#showMarkers = Boolean(value)
-    this.#scene?.setMarkersVisible(this.#showMarkers && !this.#minimal)
+    this.#scene?.setMarkersVisible(this.#showMarkers)
     this.#writePrefs()
   }
 
@@ -838,7 +838,6 @@ export class GeoraGlobe extends EventTarget {
 
   set minimal(value) {
     this.#minimal = Boolean(value)
-    this.#scene?.setMarkersVisible(this.#showMarkers && !this.#minimal)
     this.#writePrefs()
   }
 

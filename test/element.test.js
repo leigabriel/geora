@@ -222,6 +222,15 @@ describe("configuration through attributes and properties", () => {
     expect(root.querySelector(".settings-toggle").hidden).toBe(true)
   })
 
+  it("keeps globe markers visible while the HUD is hidden", () => {
+    const el = mount({ minimal: true })
+    expect(currentScene().last("setMarkersVisible").args[0]).toBe(true)
+    el.showMarkers = false
+    expect(currentScene().last("setMarkersVisible").args[0]).toBe(false)
+    el.showMarkers = true
+    expect(currentScene().last("setMarkersVisible").args[0]).toBe(true)
+  })
+
   it("gates the HUD with show-hud", () => {
     const el = mount({ "show-hud": "false" })
     expect(el.shadowRoot.querySelector(".controls").hidden).toBe(true)
