@@ -3,13 +3,13 @@
 
 /* self hosted, cached by `npm run assets` */
 
-/* the globe interface reads in Departure Mono */
+/* the globe interface reads in Geist Pixel */
 @font-face {
-  font-family: "Departure Mono";
+  font-family: "Geist Pixel";
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url("/fonts/departure-mono.woff2") format("woff2");
+  src: url("/fonts/geist-pixel.woff2") format("woff2");
 }
 
 /* documentation is set in JetBrains Mono, which is easier to read at length */
@@ -22,7 +22,7 @@
 }
 
 @theme {
-  --font-readout: "Departure Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-readout: "Geist Pixel", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --font-prose: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
@@ -58,7 +58,7 @@ body {
   margin: 0;
   background-color: var(--bg-color);
   color: var(--fg-color);
-  font-family: "Departure Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace,
+  font-family: "Geist Pixel", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace,
     "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", monospace;
   overflow: hidden;
   overscroll-behavior: none;
