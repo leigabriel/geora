@@ -5,6 +5,8 @@ shader-lit points: land carries the Natural Earth 110m raster, borders glow in
 the accent colour, and every sovereign nation is pinned with a beacon and a flag
 sprite you can grab, spin, zoom into and read.
 
+<img src="public/geora.png" alt="The Geora globe" width="640" />
+
 The globe is also a display. A pill at the bottom centre carries the running
 layer — nations, landmark photographs, modeled traffic telemetry and announced AI
 compute campuses. Tap it and the layer list opens above it; pick one and the list
