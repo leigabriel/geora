@@ -22,8 +22,7 @@ const SECTIONS = [
     id: 'quickstart',
     title: 'Quick Start',
     body: [
-      'The bottom-centre control is a single pill carrying the running layer. Tap it and the layer list opens above it; pick one and the list closes again. A click anywhere outside the dock, or Escape, dismisses it too. Keys 1 to 4 jump straight to a layer, and the arrow keys step through them in order.',
-      'The panel above the pill is a readout, not a control panel. It reports what the running layer contains and nothing more: there are no pickers, steppers or buttons, because everything a host might want to choose is declared in config.js.',
+      'The bottom-centre control is a bordered box showing the current layer name and its position, for example COUNTRIES 1 / 4. Use the left and right arrows inside it to step through the layers; the globe updates immediately. Keys 1 to 4 jump straight to a layer, and the arrow keys step through them in order.',
       'Tap or click any beacon to open its card. Press Escape to dismiss it. Press H to hide the interface and D to open these docs.',
     ],
   },
@@ -41,7 +40,7 @@ const SECTIONS = [
     title: 'Selection Modes',
     body: [
       'Four selections ship by default: countries, polaroids, analytics and AI centers. Each owns one three.js group, so switching swaps the contents of the planet rather than stacking overlays on top of it.',
-      'Number keys 1 to 4 jump directly to a selection. Arrowing left or right steps through them in order.',
+      'Number keys 1 to 4 jump directly to a selection. The pagination arrows at the bottom centre step through them in order, as do the left and right arrow keys.',
     ],
   },
   {
@@ -66,8 +65,8 @@ const SECTIONS = [
     id: 'analytics',
     title: 'Analytics',
     body: [
-      'Text-based only. There is no 3D graph: the globe floats the value over each nation, sized by magnitude so a strong reading carries further than a weak one, and the full numbers and ranking live in the readout and the card.',
-      'Each float is white text on a solid black chip. The chip does not follow the theme, deliberately: it reads the same on paper and on a dark globe and never collides with the accent colour the HUD is tuned to.',
+      'Text-based only. There is no 3D graph: the globe floats the value over each nation, sized by magnitude so a strong reading carries further than a weak one, and the full numbers and ranking live in the card.',
+      'Each float is tinted a stable colour derived from the nation code, drawn on a solid black chip. The chip does not follow the theme, deliberately: it reads the same on paper and on a dark globe and never collides with the accent colour the HUD is tuned to. Neighbouring readings stay apart because each nation carries its own hue.',
       'The bundled dataset is MODELED, not measured. It is derived from population, timezone and a hash of each ISO code, which makes it stable across reloads and plausible in magnitude, but it is not real traffic. Every surface labels it.',
       'Supply your own buildAnalytics implementation through config to drive the layer from a real backend. The metric is config.defaultMetric, not a switch in the interface.',
     ],
@@ -76,7 +75,7 @@ const SECTIONS = [
     id: 'centers',
     title: 'AI Data Centers',
     body: [
-      'AI compute campuses are drawn directly on the globe at their geographic coordinates. Tap one to open a card carrying its operator, country, announced capacity, build status and focus.',
+      'AI compute campuses are drawn directly on the globe at their geographic coordinates: the site name floats above its pin as a black text chip, the same way analytics floats a value. Tap one to open a card carrying its operator, country, announced capacity, build status and focus.',
       'Every entry is a real site named by its operator. Status separates operating from under construction from announced and not yet built, so the layer distinguishes running capacity from press releases. Capacity is the announced figure in gigawatts, and reads Not disclosed where the operator has published none: it is never estimated.',
       'Closing the card restores the previous rotation, zoom and globe state. The wide halo marks a metro hosting more than one site. Replace config.centers with your own.',
     ],
@@ -85,7 +84,8 @@ const SECTIONS = [
     id: 'themes',
     title: 'Themes',
     body: [
-      'A theme sets the background, globe, text, markers, HUD chrome and accent colours as one set. Names describe what the screen looks like: Paper White, Ink Black, Amber Screen, Phosphor Green, Blueprint Grid, Dusk Violet.',
+      'A theme repaints the globe stage and nothing else: the backdrop behind the sphere, the sphere itself, the dot cloud and the beacons pinned to it. Names describe the globe: Paper White, Ink Black, Amber Screen, Phosphor Green, Blueprint Grid, Dusk Violet.',
+      'The interface does not follow the theme. Panels, modals, buttons and text keep the fixed Paper White palette — light surfaces, dark text, one blue accent — so a dark globe never drags the HUD into unreadable contrast, and every theme is legible because each one picks a dot colour that reads against its own sphere.',
     ],
   },
   {
@@ -116,7 +116,7 @@ const SECTIONS = [
     id: 'keyboard',
     title: 'Keyboard Controls',
     body: [
-      'Keys 1 to 4 jump directly to a layer. Left and right arrows step between layers. H hides or shows the interface. D opens these docs. Escape closes the panels, then dismisses the card.',
+      'Keys 1 to 4 jump directly to a layer. The pagination arrows at the bottom centre, or the left and right arrow keys, step between layers. H hides or shows the interface. D opens these docs. Escape closes the panels, then dismisses the card.',
     ],
   },
   {
@@ -131,7 +131,7 @@ const SECTIONS = [
     title: 'API Reference',
     body: [
       'createGlobeScene({ container, config }) returns the renderer handle. It is deliberately free of Geora-specific content.',
-      'start() begins the loop. setMode(key) swaps layers. setTheme(theme) applies a palette. setHalftone({ density, scale, contrast, threshold, intensity, ocean, ambient }) drives the point shader. setGlobeScale, setMarkerScale, setDetail, setAnimationIntensity and setMotion drive the visual profile.',
+      'start() begins the loop. setMode(key) swaps layers. setTheme(theme) applies a globe palette to the stage, the sphere, the dots and the beacons. setHalftone({ density, scale, contrast, threshold, intensity, ocean, ambient }) drives the point shader. setGlobeScale, setMarkerScale, setDetail, setAnimationIntensity and setMotion drive the visual profile.',
       'setAnalytics(analytics, metric) and setPolaroids(list) feed the data layers.',
       'probe(x, y) resolves a tap to a marker or a lat/lon on the sphere. snapshot() and restore(state) bracket a temporary focus so the globe can be handed back exactly as it was.',
       'flyTo(place), reset(), zoomBy(delta), drag(dx, dy), setAutoRotate(on) and dispose() cover navigation and lifecycle.',
