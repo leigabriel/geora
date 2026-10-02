@@ -8,7 +8,7 @@ export default function GlobeControls({ spinning, spinEnabled, onReset, onSpin }
       role="group"
       aria-label="Globe controls"
       style={{ bottom: 'var(--hud-safe-bottom)' }}
-      className="bit-panel fixed left-3 z-20 flex h-9 items-center gap-1 rounded-xl border px-1.5 text-[10px] font-bold uppercase tracking-[0.16em] sm:left-4"
+      className="bit-panel fixed left-3 z-20 flex h-9 items-center gap-1 border px-1.5 text-[10px] font-bold uppercase tracking-[0.16em] sm:left-4"
     >
       <button
         type="button"
