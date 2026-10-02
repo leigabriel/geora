@@ -1,149 +1,257 @@
-// The Docs entry in the top right: the package reference, trimmed to what a
-// developer needs while the globe is on screen, laid out as one continuous
-// page. There is no tab strip — the whole document scrolls. The material
+// The Docs entry in the top right: the package reference as a scannable sheet —
+// install steps and attribute / API / event / data / theme tables instead of
+// prose, so a developer can find one line while the globe is on screen. It
 // follows README.md and documents only the public geora-globe API.
+const README_URL = 'https://raw.githubusercontent.com/leigabriel/geora/master/README.md'
+const VERSION = '0.1.1'
+const CDN = `https://cdn.jsdelivr.net/npm/geora-globe@${VERSION}/+esm`
+
 const SECTIONS = [
   {
-    id: 'intro',
-    title: 'Documentation',
-    body: [
-      'Geora is a spatial visualization interface built around one interactive halftone globe — rotate it, zoom it, tap the beacons pinned to every nation. Its engine ships independently as geora-globe: a framework-agnostic Three.js point-cloud planet presented as a custom element and as a JavaScript class.',
-      'Setup: npm install geora-globe, import it once — the import registers <geora-globe> — and drop the tag into any page. No React, no Tailwind, no build step required.',
-      'How it works: the element fills its parent and mounts the renderer inside its shadow root. Configuration flows in through attributes, properties and data; interactions flow out as bubbling geora-* CustomEvents with plain JSON payloads. A theme recolours the globe — never the page background — and a mode swaps which layer is on screen.',
-      'Styles live in the component shadow DOM, so nothing leaks: the package emits no global CSS and page styles cannot reach in. The only runtime dependencies are three, d3-geo and topojson-client.',
-      'This demo consumes the package exactly like an external consumer: it imports the geora-globe specifier and never reaches into the package source.',
+    id: 'start',
+    title: 'Get started',
+    note: 'geora-globe is a framework-agnostic Three.js halftone globe: one custom element, one JavaScript class. No React, no Tailwind, no build step.',
+    steps: [
+      'npm install geora-globe  (pnpm add / yarn add work too)',
+      "import 'geora-globe' — the import registers <geora-globe>",
+      'Give it a size: the element fills its parent, so set width and height on it or on an ancestor',
+      '<geora-globe theme="paper" mode="country" auto-rotate minimal></geora-globe>',
+      'globe.addEventListener("geora-select", ({ detail }) => …) to build your own UI',
     ],
-  },
-  {
-    id: 'quickstart',
-    title: 'Quick Start',
-    body: [
-      'In HTML: <geora-globe theme="dark" mode="country" auto-rotate></geora-globe>. The element fills its parent, so give it or an ancestor a size. Import the module from your bundler, or from a CDN with the +esm suffix.',
-      'Listen for events to build your own interface: geora-select fires when a beacon is tapped, geora-hover when the pointer enters one, geora-clear when the selection closes. Every event is a bubbling CustomEvent, so listening on the element or on any ancestor works.',
-      'Keys 1 to 9 jump to a layer when the globe has focus, arrows rotate, plus and minus zoom, Home resets, Escape clears. This demo adds H to hide the interface and D to open these docs.',
-    ],
+    cdn: `No bundler? <script type="module" src="${CDN}"></script>`,
   },
   {
     id: 'attributes',
-    title: 'API Reference — Attributes',
-    body: [
-      'Every attribute has a same-named camelCase property (flag-base becomes flagBase). Attributes are declarative; writing a property after mount applies immediately. Booleans are value-aware: present means true, "false", "0" and "off" mean false.',
-      'Core: theme, mode, modes (comma-separated subset), auto-rotate (alias of spinning), motion (auto / on / off), flag-base, persistence (localStorage under geora-globe:prefs:v1).',
-      'HUD: minimal hides the whole built-in interface; show-hud is the master switch; show-tooltip, show-info-card, show-controls, show-navigation and show-settings trim it further; show-borders and show-markers trim the globe.',
-      'Visual: globe-scale (default 0.7), marker-scale (0.75), detail (0 low, 1 medium, 2 high), animation (1), and the halftone set: halftone-density, halftone-scale, contrast, threshold, intensity, ambient, ocean-opacity.',
+    title: 'Attributes',
+    note: 'Every attribute has a same-named camelCase property (flag-base → flagBase). Booleans are value-aware: present means true, "false", "0" and "off" mean false. Also halftone-scale, contrast, intensity, ambient and ocean-opacity.',
+    head: ['Attribute', 'Default', 'What it does'],
+    rows: [
+      ['theme', 'paper', 'Globe palette: sphere, dots, borders, beacons. Page background never changes'],
+      ['mode', 'country', 'Active layer: country, polaroid, analytics, centers, markers'],
+      ['modes', 'auto', 'Comma-separated subset; auto = every layer that has data'],
+      ['auto-rotate', 'true', 'Spin the globe (alias of the spinning property)'],
+      ['motion', 'auto', 'auto follows prefers-reduced-motion; on / off override it'],
+      ['minimal', 'false', 'Hide the built-in HUD, so only the globe shows'],
+      ['show-hud', 'true', 'Master switch for the built-in HUD'],
+      ['show-tooltip', 'true', 'Hover tooltip'],
+      ['show-info-card', 'true', 'Selection card'],
+      ['show-controls', 'true', 'Reset / Spin buttons'],
+      ['show-navigation', 'true', 'Layer navigation'],
+      ['show-settings', 'false', 'Settings toggle and panel'],
+      ['show-markers', 'true', 'Beacons, flags and values'],
+      ['show-borders', 'true', 'Country outlines'],
+      ['flag-base', '""', 'Flags as ${flag-base}/${iso2}.png (+ @2x). Empty = code chips, no requests'],
+      ['globe-scale', '0.7', 'Globe size multiplier'],
+      ['marker-scale', '0.75', 'Beacon size multiplier'],
+      ['detail', '2', 'Dot density: 0 low, 1 medium, 2 high'],
+      ['animation', '1', 'Animation intensity multiplier (0 – 2.5)'],
+      ['halftone-density', '1.0', 'Dot cloud density'],
+      ['threshold', '0.4', 'Dot edge threshold'],
+      ['persistence', 'false', 'Store preferences in localStorage (geora-globe:prefs:v1)'],
     ],
   },
   {
     id: 'api',
-    title: 'API Reference — Properties and Methods',
-    body: [
-      'Configuration properties: theme (key or colour object), mode, modes, spinning / autoRotate, motion, detail, globeScale, markerScale, animation, halftone (partial object merges), flagBase, minimal, persistence, and one show* boolean per HUD piece. settings is a read-only snapshot; selection is the current public marker or null.',
-      'Data: assign globe.data = { countries, centers, markers, landmarks } or call setData() with any subset — omitted collections keep their contents. Supplying markers adds the markers layer to the rotation; removing them drops it.',
-      'Selection and camera: selectCountry(code), clearSelection(), flyTo(lat, lon), rotate(dx, dy), zoom(delta), reset() (clears the selection and returns the default view).',
-      'Lifecycle: start(), stop(), destroy(). The loop starts on connect, pauses on disconnect, and destroy() releases every GPU resource. The headless class is GeoraGlobe — same surface, no attributes, no built-in HUD. registerGeoraGlobe("my-globe") defines an alias tag.',
+    title: 'Properties and methods',
+    head: ['Member', 'Notes'],
+    rows: [
+      ['theme', 'Built-in key or a custom colour object'],
+      ['mode / modes', 'Switch layer (clears the selection) / restrict the rotation'],
+      ['spinning / motion / detail / animation', 'Booleans and 0 – 2 numbers, as in the table above'],
+      ['globeScale / markerScale', 'Size multipliers, applied live'],
+      ['halftone', 'Partial object merge: { density, threshold, contrast, … }'],
+      ['data', 'globe.data = { countries, centers, markers, landmarks } — partial is fine'],
+      ['setData(next)', 'Merge any subset; omitted collections keep their contents'],
+      ['selectCountry(code)', 'true when found; accepts ISO alpha-3 or alpha-2'],
+      ['clearSelection()', 'true when something was selected'],
+      ['selection', 'The selected public marker, or null'],
+      ['settings', 'Read-only snapshot of the effective settings'],
+      ['flyTo(lat, lon)', 'Camera to a point'],
+      ['rotate(dx, dy) / zoom(delta)', 'Keyboard-accessible drag and wheel'],
+      ['reset()', 'Default camera, clears the selection'],
+      ['start() / stop() / destroy()', 'Loop control and full teardown'],
+      ['registerGeoraGlobe(tag)', 'Define an alias tag; GeoraGlobe is the headless class'],
     ],
   },
   {
     id: 'events',
     title: 'Events',
-    body: [
-      'geora-ready {} — the render loop started. geora-hover { marker, x, y } — the hovered marker changed; marker is null when the pointer leaves. geora-select { marker, x, y } — a marker was selected; x and y are null for programmatic selection.',
-      'geora-country-select and geora-marker-select carry the same payload for those kinds. geora-sphere-select { lat, lon, onLand, country, distanceKm, x, y } reports a tap on the bare sphere. geora-clear {} fires when the selection closes, including when a mode change clears it.',
-      'geora-mode-change { mode, modes } reports the active layer and the available list. geora-theme-change { theme, key } carries the public colour object (key is null for custom themes). geora-reset {} fires after reset().',
+    note: 'Every event bubbles and crosses shadow boundaries, so listening on the element or any ancestor works.',
+    head: ['Event', 'Detail', 'Fires when'],
+    rows: [
+      ['geora-ready', '{}', 'The render loop started'],
+      ['geora-hover', '{ marker, x, y }', 'The hovered marker changed (marker: null when it leaves)'],
+      ['geora-select', '{ marker, x, y }', 'A marker was selected (x, y null if programmatic)'],
+      ['geora-country-select', '{ country, x, y }', 'A country beacon was selected'],
+      ['geora-marker-select', '{ marker, x, y }', 'A host-supplied marker was selected'],
+      ['geora-sphere-select', '{ lat, lon, onLand, country, distanceKm, x, y }', 'A tap on the bare sphere'],
+      ['geora-clear', '{}', 'The selection closed (also on mode change)'],
+      ['geora-mode-change', '{ mode, modes }', 'The active layer or the mode list changed'],
+      ['geora-theme-change', '{ theme, key }', 'The theme changed (background is advisory)'],
+      ['geora-reset', '{}', 'reset() ran'],
     ],
   },
   {
-    id: 'schema',
-    title: 'Data Schema',
-    body: [
-      'Country: { code, iso2, country, name, lat, lon, region, pop, tz, curr, fact }. code (ISO alpha-3) is the join key; lat and lon are required. Center: { id, name, operator, code, lat, lon, status, powerGW, tier, focus }. Marker: { id, name, lat, lon, type }. Landmark: { iso2, country, caption, lat, lon, image }.',
-      'The package ships 50 countries, 73 announced AI campuses and 50 landmark entries as defaults — all optional, all replaced through data. Analytics rows are modeled from population, timezone and a hash of the country code: stable, plausible, labelled as modeled, never measured.',
-      'Images are URLs you supply. joinLandmarks(places, imageBase) builds landmark entries as image = imageBase/iso2.jpg; flag-base does the same for flags as base/iso2.png with an @2x variant. With flag-base empty the default, nothing is requested and markers fall back to code chips.',
+    id: 'data',
+    title: 'Data',
+    note: 'Defaults ship with the package: 50 countries, 73 AI campuses, 50 landmarks — every collection is optional and fully replaceable. Analytics values are MODELED (population + timezone + a hash of the country code): stable and plausible, never measured.',
+    head: ['Collection', 'Fields', 'Notes'],
+    rows: [
+      ['countries', 'code (ISO alpha-3), iso2, country, name, lat, lon, region, pop, tz, curr, fact', 'code, lat and lon are required'],
+      ['centers', 'id, name, operator, code, lat, lon, status, powerGW, tier, focus', 'powerGW is the announced figure, never estimated'],
+      ['markers', 'id, name, lat, lon, type', 'Supplying any marker adds the markers layer'],
+      ['landmarks', 'iso2, country, caption, lat, lon, image', 'image is any URL; joinLandmarks(places, base) builds base/${iso2}.jpg'],
+    ],
+  },
+  {
+    id: 'images',
+    title: 'Flags and photographs',
+    note: 'The package ships no images, so nothing is requested until you point it at your own files — offline-safe out of the box, and a missing file never breaks a beacon.',
+    head: ['Asset', 'Pattern'],
+    rows: [
+      ['Flags', 'flag-base="/flags" requests /flags/ph.png and /flags/ph@2x.png'],
+      ['Polaroids', 'landmark.image = "landmarks/jp.jpg" — any URL you like'],
+      ['No flag file', 'The beacon falls back to an ISO code chip'],
+      ['joinLandmarks(places, base)', 'Builds landmark entries with image URLs from your countries'],
     ],
   },
   {
     id: 'themes',
     title: 'Themes',
-    body: [
-      'Six built-ins: paper (PAPER WHITE), dark (INK BLACK), amber (AMBER SCREEN), matrix (PHOSPHOR GREEN), blueprint (BLUEPRINT GRID) and dusk (DUSK VIOLET). Set the theme attribute or assign the theme property.',
-      'A theme repaints the globe itself — sphere, dots, beacons and country outlines. The page background never changes: the stage stays on its default paper backdrop, so the overall look remains paper whichever theme is active. The component HUD and your page chrome keep their own palette, so a dark globe never drags the interface into unreadable contrast. geora-theme-change carries the theme background if you want to apply it to your page yourself.',
-      'A custom theme is a plain object — { label, background, globe, foreground, accent, border } in #rrggbb, #rgb or 0xRRGGBB — assigned to the theme property. Missing colours fall back, so a partial theme stays legible. THEMES, THEME_KEYS, nextTheme() and themeHex() are exported for your own picker.',
+    note: 'A theme recolours the globe — sphere, dots, borders, beacons — and never the page background: the stage stays on its default paper white, so the overall look remains paper whichever theme is active. A custom theme is a plain object { background, globe, foreground, accent, border } with missing colours falling back; background is advisory, so apply it yourself through --geora-stage-bg if you want full-page theming.',
+    head: ['Key', 'Label', 'Globe'],
+    rows: [
+      ['paper', 'PAPER WHITE', 'Light sphere, ink dots, blue accents'],
+      ['dark', 'INK BLACK', 'Ink sphere, white dots, mint accents'],
+      ['amber', 'AMBER SCREEN', 'Dark amber sphere, gold dots'],
+      ['matrix', 'PHOSPHOR GREEN', 'Near-black sphere, phosphor dots'],
+      ['blueprint', 'BLUEPRINT GRID', 'Deep blue sphere, pale blue dots'],
+      ['dusk', 'DUSK VIOLET', 'Violet-black sphere, lilac dots'],
     ],
   },
   {
     id: 'modes',
     title: 'Modes',
-    body: [
-      'Five layers: country (beacons per nation), polaroid (photographs pinned at landmarks), analytics (modeled telemetry), centers (announced AI campuses) and markers (host-supplied). Each owns its own three.js group, so switching swaps the planet contents instead of stacking overlays.',
-      'The rotation auto-limits to layers that have data — markers only appears once you supply marker data. Restrict further with modes="country, centers" or the modes property. Number keys, the navigation arrows and geora-mode-change all walk the same list.',
+    head: ['Key', 'Label', 'Shows'],
+    rows: [
+      ['country', 'COUNTRIES', 'One beacon + flag per nation'],
+      ['polaroid', 'POLAROIDS', 'One photograph per landmark, pinned where it stands'],
+      ['analytics', 'ANALYTICS', 'Modeled telemetry per nation (labelled MODELED)'],
+      ['centers', 'AI DATA CENTERS', 'Announced AI compute campuses'],
+      ['markers', 'MARKERS', 'Host-supplied markers — only present once you supply data'],
     ],
   },
   {
-    id: 'customization',
-    title: 'Customization',
-    body: [
-      'Own the interface: set minimal (or show-hud false) to hide the built-in tooltip, card, controls, navigation and settings, then build your own from the events. This demo does exactly that — React components around one <geora-globe minimal>.',
-      'Restyle through custom properties on the element: --geora-font, --geora-panel, --geora-panel-border, --geora-text, --geora-text-dim, --geora-accent, --geora-shadow, --geora-radius and --geora-stage-bg. The same sheet is exported as geora-globe/styles.css for reference.',
-      'Persistence: the persistence attribute stores theme, mode, spinning, motion, HUD switches and the visual profile under geora-globe:prefs:v1, and restores them over the shipped defaults. Without it, the package never touches localStorage.',
+    id: 'keyboard',
+    title: 'Keyboard',
+    note: 'Applies while the globe has focus; arrows, + and -, Home, digits and Escape are captured and prevent default.',
+    head: ['Key', 'Action'],
+    rows: [
+      ['← → ↑ ↓', 'Rotate'],
+      ['+ / -', 'Zoom'],
+      ['Home', 'Reset the view'],
+      ['1 – 9', 'Jump to a layer'],
+      ['Escape', 'Close settings, then clear the selection'],
+      ['Tab', 'Leave the globe for the next control'],
     ],
   },
   {
-    id: 'examples',
-    title: 'Examples',
-    body: [
-      'React: render <geora-globe ref={ref} theme="matrix" /> and add listeners in useEffect, removing them in the cleanup. Vue: bind a template ref and listen in onMounted / onBeforeUnmount. Svelte: bind:this and onMount / onDestroy. There is no framework-specific package — the element is a normal DOM node.',
-      'Headless: new GeoraGlobe({ container, theme, mode, data }) gives the same properties, methods and events with no attributes and no built-in HUD — for applications that own every pixel.',
-      'Custom data end to end: pass { countries, centers, markers, landmarks } through data or setData(), set flag-base for sprites, and listen for geora-select to render your own card. A centre without a matching country code still draws, it simply has no territory to fly to.',
+    id: 'styling',
+    title: 'Styling',
+    note: 'Styles live in the shadow DOM: the package emits no global CSS, no Tailwind is required, and page styles cannot leak in.',
+    head: ['Custom property', 'Use'],
+    rows: [
+      ['--geora-stage-bg', 'Page backdrop behind the globe (themes never change it)'],
+      ['--geora-accent', 'Accent colour used by the built-in HUD'],
+      ['--geora-panel / --geora-panel-border', 'Panel surface and border'],
+      ['--geora-text / --geora-text-dim', 'HUD text colours'],
+      ['--geora-font', 'HUD type stack'],
+      ['--geora-shadow / --geora-radius', 'Panel shadow and corner radius'],
     ],
   },
   {
-    id: 'performance',
-    title: 'Performance',
-    body: [
-      'detail is the main lever: 0 draws the fewest points, 2 the densest — ship 0 or 1 on constrained devices. animation scales every pulse and bob and can be 0 for a static-but-interactive globe. Globe scale is a size, not a distance: raising it pulls the camera in.',
-      'motion="off" (or the OS reduced-motion setting under motion="auto") freezes auto-rotation, pulses and drag inertia in one switch. stop() pauses the loop, destroy() releases it, and the renderer pauses whenever the element leaves the DOM.',
-    ],
-  },
-  {
-    id: 'a11y',
-    title: 'Accessibility',
-    body: [
-      'The element is focusable, carries role="application" with an aria-label you can override, and announces every selection through a polite live region — including selections made through your own interface.',
-      'With focus on the globe: arrows rotate, plus and minus zoom, Home resets, 1 to 9 jump to a mode, Escape closes settings and then clears the selection, Tab moves on. Outside the globe, drag, wheel and tap work with pointer and touch.',
-      'Reduced motion follows prefers-reduced-motion by default and is overridable per instance with motion="on" or "off". Cursors reflect the gesture: grab at rest, grabbing while dragging, pointer over a beacon.',
+    id: 'frameworks',
+    title: 'Frameworks',
+    note: 'There is no framework-specific package — the element is a normal DOM node in all of them.',
+    head: ['Framework', 'Usage'],
+    rows: [
+      ['Plain HTML', `<script type="module" src="${CDN}"></script>`],
+      ['React', '<geora-globe ref={ref} theme="matrix" /> — add listeners in useEffect'],
+      ['Vue', '<geora-globe ref="globe" mode="polaroid" /> — onMounted / onBeforeUnmount'],
+      ['Svelte', '<geora-globe bind:this={globe} mode="analytics" /> — onMount / onDestroy'],
+      ['Headless JS', 'new GeoraGlobe({ container, theme, data }) — no attributes, no HUD'],
     ],
   },
   {
     id: 'demo',
-    title: 'This Demo',
-    body: [
-      'The bottom-centre control shows the running layer and its position, for example COUNTRIES 1 / 4; its arrows step through the layers, keys 1 to 4 jump directly. Tap a beacon to open its card, Escape or a tap on bare space to dismiss it — the globe returns to the rotation and zoom it had before the selection.',
-      'Settings carries theme, globe scale, marker visibility, detail, halftone calibration, motion sensitivity, animation and the synthesized audio. The eye button or H hides the whole interface without disabling the globe; D reopens these docs.',
-      'Sound is Tone.js only, no samples: a speed-sensitive drag ratchet with a release thunk, a select chime, hover blips and UI pips, behind a persisted mute toggle. It lives in the demo, not in the package.',
+    title: 'This demo',
+    note: 'Sound is Tone.js only, no samples: a speed-sensitive drag ratchet, a select chime, hover blips and UI pips, all started on your first gesture and behind a persisted mute toggle.',
+    head: ['Key', 'Action'],
+    rows: [
+      ['H', 'Hide the whole interface without disabling the globe'],
+      ['D', 'Open this reference'],
+      ['1 – 4', 'Jump to a layer'],
+      ['← →', 'Step through layers from the navigation'],
+      ['Click a beacon', 'Open its card; Escape or a tap on bare space dismisses it'],
     ],
   },
   {
     id: 'credits',
-    title: 'Credits',
+    title: 'Credits and contact',
     body: [
       'geora-globe, MIT licensed. Point cloud from Natural Earth 110m via world-atlas, flags from flagcdn, landmark photographs from Wikipedia (CC BY-SA or public domain, credited in public/landmarks/credits.json), interface set in Geist Pixel and JetBrains Mono (SIL OFL), audio synthesized with Tone.js in this demo.',
-      {
-        parts: [
-          'Source code: ',
-          { label: 'github.com/leigabriel/geora', href: 'https://github.com/leigabriel/geora' },
-        ],
-      },
-      {
-        parts: [
-          'Instagram: ',
-          { label: '@leimxnsquare', href: 'https://instagram.com/leimxnsquare' },
-          ' · Email: ',
-          { label: 'malibiranleigabriel@gmail.com', href: 'mailto:malibiranleigabriel@gmail.com' },
-        ],
-      },
+    ],
+    links: [
+      { label: 'github.com/leigabriel/geora', href: 'https://github.com/leigabriel/geora' },
+      { label: 'instagram.com/leimxnsquare', href: 'https://instagram.com/leimxnsquare' },
+      { label: 'malibiranleigabriel@gmail.com', href: 'mailto:malibiranleigabriel@gmail.com' },
     ],
   },
 ]
+
+function toMarkdown() {
+  const lines = [`# geora-globe ${VERSION} — reference`, '', 'Generated from the in-app documentation panel.', '']
+  for (const section of SECTIONS) {
+    lines.push(`## ${section.title}`, '')
+    if (section.note) lines.push(section.note, '')
+    if (section.steps) section.steps.forEach((step, i) => lines.push(`${i + 1}. ${step}`)), lines.push('')
+    if (section.cdn) lines.push(section.cdn, '')
+    if (section.head) {
+      lines.push(`| ${section.head.join(' | ')} |`, `| ${section.head.map(() => '---').join(' | ')} |`)
+      for (const row of section.rows) lines.push(`| ${row.join(' | ')} |`)
+      lines.push('')
+    }
+    if (section.body) lines.push(...section.body, '')
+    if (section.links) lines.push(section.links.map((l) => `[${l.label}](${l.href})`).join(' · '), '')
+  }
+  return lines.join('\n')
+}
+
+function save(blob, name) {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = name
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+async function downloadReadme() {
+  try {
+    const res = await fetch(README_URL)
+    if (!res.ok) throw new Error(String(res.status))
+    save(await res.blob(), 'geora-globe-README.md')
+  } catch {
+    window.open(README_URL, '_blank', 'noopener')
+  }
+}
+
+function downloadDocs() {
+  save(new Blob([toMarkdown()], { type: 'text/markdown' }), 'geora-globe-docs.md')
+}
+
+const rowLabel = 'border-b border-(--border-color)/60 py-1.5 pr-2 align-top font-bold whitespace-nowrap'
+const rowCell = 'border-b border-(--border-color)/60 py-1.5 pr-2 align-top'
 
 export default function DocsPanel({ open, onClose }) {
   return (
@@ -170,6 +278,7 @@ export default function DocsPanel({ open, onClose }) {
           <div className="flex min-w-0 items-center gap-2.5">
             <span className="h-2 w-2 shrink-0 rounded-full bg-(--accent-color)" aria-hidden="true" />
             <span className="truncate text-xs font-bold uppercase tracking-[0.2em]">Documentation</span>
+            <span className="shrink-0 text-[10px] opacity-50">v{VERSION}</span>
           </div>
           <button
             type="button"
@@ -188,36 +297,94 @@ export default function DocsPanel({ open, onClose }) {
               <h2 className="mb-2 text-[13px] font-bold uppercase tracking-[0.18em] text-(--accent-color)">
                 {section.title}
               </h2>
-              <div className="flex flex-col gap-2.5">
-                {section.body.map((paragraph, index) => (
-                  <p key={index} className="text-[12px] leading-relaxed opacity-90">
-                    {typeof paragraph === 'string'
-                      ? paragraph
-                      : paragraph.parts.map((part, partIndex) =>
-                          typeof part === 'string' ? (
-                            part
-                          ) : (
-                            <a
-                              key={partIndex}
-                              href={part.href}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-(--accent-color) underline underline-offset-2 hover:opacity-80"
+
+              {section.note && <p className="mb-2 text-[11px] leading-relaxed opacity-75">{section.note}</p>}
+
+              {section.steps && (
+                <ol className="mb-2 flex flex-col gap-1.5">
+                  {section.steps.map((step, index) => (
+                    <li key={index} className="flex gap-2 text-[11px] leading-relaxed">
+                      <span className="mt-px flex h-4 w-4 shrink-0 items-center justify-center bg-(--accent-color) text-[9px] font-bold text-white">
+                        {index + 1}
+                      </span>
+                      <span className="opacity-90">{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+
+              {section.cdn && <p className="mb-2 text-[11px] leading-relaxed opacity-75">{section.cdn}</p>}
+
+              {section.head && (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-104 border-collapse text-[11px]">
+                    <thead>
+                      <tr>
+                        {section.head.map((cell) => (
+                          <th
+                            key={cell}
+                            scope="col"
+                            className="border-b border-(--border-color) py-1 pr-3 text-left text-[9px] font-bold uppercase tracking-[0.16em] opacity-55"
+                          >
+                            {cell}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {section.rows.map((row, rowIndex) => (
+                        <tr key={rowIndex} className="hover:bg-(--accent-subtle)">
+                          {row.map((cell, cellIndex) => (
+                            <td
+                              key={cellIndex}
+                              className={cellIndex === 0 ? rowLabel : rowCell}
                             >
-                              {part.label ?? part.href}
-                            </a>
-                          ),
-                        )}
-                  </p>
-                ))}
-              </div>
+                              {cell}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {section.body?.map((paragraph, index) => (
+                <p key={index} className="mb-1.5 text-[11px] leading-relaxed opacity-90">
+                  {paragraph}
+                </p>
+              ))}
+
+              {section.links && (
+                <p className="text-[11px]">
+                  {section.links.map((link, index) => (
+                    <span key={link.href}>
+                      {index > 0 && <span className="px-1.5 opacity-50">·</span>}
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-(--accent-color) underline underline-offset-2 hover:opacity-80"
+                      >
+                        {link.label}
+                      </a>
+                    </span>
+                  ))}
+                </p>
+              )}
             </section>
           ))}
-
-          <p className="mt-4 border-t border-(--border-color) pt-3 text-[10px] opacity-45">
-            The same reference lives in README.md at the repository root.
-          </p>
         </div>
+
+        <footer className="flex shrink-0 flex-wrap items-center gap-2 border-t border-(--border-color) p-3 sm:px-5">
+          <button type="button" onClick={downloadReadme} className="hud-btn px-2.5 text-[10px]" title={README_URL}>
+            <i className="fa-solid fa-download" aria-hidden="true" /> README.md
+          </button>
+          <button type="button" onClick={downloadDocs} className="hud-btn px-2.5 text-[10px]" title="This panel as Markdown">
+            <i className="fa-solid fa-download" aria-hidden="true" /> Docs (.md)
+          </button>
+          <span className="ml-auto text-[10px] opacity-45">geora-globe {VERSION} · MIT</span>
+        </footer>
       </aside>
     </>
   )
