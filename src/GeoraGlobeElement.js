@@ -649,6 +649,16 @@ export class GeoraGlobeElement extends HTMLElementBase {
     this.#globe?.reset()
   }
 
+  // read-only views onto the engine, mirrored from GeoraGlobe so hosts never
+  // have to reach through #globe
+  get selection() {
+    return this.#globe ? this.#globe.selection : null
+  }
+
+  get settings() {
+    return this.#globe ? this.#globe.settings : null
+  }
+
   clearSelection() {
     return this.#globe ? this.#globe.clearSelection() : false
   }

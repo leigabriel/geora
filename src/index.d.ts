@@ -251,6 +251,7 @@ export class GeoraGlobe extends EventTarget {
   flagBase: string
 
   readonly selection: PublicMarker | null
+  readonly settings: GlobeSettings
 
   start(): void
   stop(): void

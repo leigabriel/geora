@@ -454,10 +454,20 @@ describe("data, selection and persistence", () => {
 
   it("selects countries through the element surface", () => {
     const el = mount()
+    expect(el.selection).toBeNull()
     expect(el.selectCountry("PHL")).toBe(true)
     expect(el.shadowRoot.querySelector(".card").hidden).toBe(false)
+    expect(el.selection).toMatchObject({ kind: "country", country: { code: "PHL" } })
     expect(el.clearSelection()).toBe(true)
+    expect(el.selection).toBeNull()
     expect(el.selectCountry("nope")).toBe(false)
+  })
+
+  it("exposes the effective settings snapshot", () => {
+    const el = mount({ theme: "amber", mode: "centers" })
+    expect(el.settings).toMatchObject({ theme: "amber", mode: "centers", showMarkers: true })
+    el.theme = "dark"
+    expect(el.settings.theme).toBe("dark")
   })
 
   it("persists preferences when the persistence attribute is present", () => {
