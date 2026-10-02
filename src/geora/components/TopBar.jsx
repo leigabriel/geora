@@ -8,7 +8,7 @@ export default function TopBar({ docsOn, settingsOn, onDocs, onSettings }) {
       className="pointer-events-none fixed inset-x-0 top-0 z-20 flex flex-wrap items-center justify-between gap-2 p-3 sm:p-4"
       style={{ paddingTop: 'var(--hud-safe-top)' }}
     >
-      <div className="bit-panel pointer-events-auto flex h-9 w-fit items-center gap-2 rounded-xl border px-3">
+      <div className="bit-panel pointer-events-auto flex h-9 w-fit items-center gap-2 border px-3">
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-(--accent-color)" aria-hidden="true" />
         <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Geora</span>
       </div>
@@ -24,6 +24,7 @@ export default function TopBar({ docsOn, settingsOn, onDocs, onSettings }) {
           onClick={onDocs}
           title="Developer documentation (D)"
           aria-pressed={docsOn}
+          aria-label="Open documentation"
         >
           <i className="fa-solid fa-book text-(--accent-color)" aria-hidden="true" />
           <span>Docs</span>
@@ -39,6 +40,7 @@ export default function TopBar({ docsOn, settingsOn, onDocs, onSettings }) {
           onClick={onSettings}
           title="Halftone calibration, visual profile, sounds and themes"
           aria-pressed={settingsOn}
+          aria-label="Open settings"
         >
           <i className="fa-solid fa-sliders text-(--accent-color)" aria-hidden="true" />
           <span>Settings</span>
