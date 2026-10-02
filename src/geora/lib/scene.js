@@ -110,39 +110,6 @@ function drawFlagTexture(ctx, img) {
   ctx.stroke()
 }
 
-const CARD_W = 96
-
-function drawCardBackdrop(ctx, w, h, radius) {
-  ctx.clearRect(0, 0, w, h)
-  ctx.save()
-  roundedRect(ctx, 5, 5, w - 10, h - 10, radius)
-  ctx.clip()
-  ctx.fillStyle = "#0b0f16"
-  ctx.fillRect(0, 0, w, h)
-  ctx.restore()
-  ctx.strokeStyle = "#ffffff"
-  ctx.lineWidth = 4
-  roundedRect(ctx, 5, 5, w - 10, h - 10, radius)
-  ctx.stroke()
-}
-
-function paintServerGlyph(ctx) {
-  ctx.fillStyle = "#e8ecf5"
-  for (let i = 0; i < 3; i += 1) {
-    const y = 20 + i * 20
-    roundedRect(ctx, 22, y, 52, 15, 3)
-    ctx.fill()
-  }
-  ctx.fillStyle = "#0b0f16"
-  for (let i = 0; i < 3; i += 1) {
-    ctx.fillRect(52, 25 + i * 20, 16, 5)
-  }
-  ctx.fillStyle = "#1a56db"
-  for (let i = 0; i < 3; i += 1) {
-    ctx.fillRect(27, 26 + i * 20, 7, 4)
-  }
-}
-
 const DOT_VERTEX = `
   attribute float aLand;
   attribute float aBorder;
@@ -343,7 +310,7 @@ export function createGlobeScene({ container, config }) {
     uDetail: { value: 1 },
     uShowBorders: { value: 1 },
     uColor: { value: new THREE.Color(0x121316) },
-    uBorderColor: { value: new THREE.Color(0x1a56db) },
+    uBorderColor: { value: new THREE.Color(0x212121) },
   }
 
   const dots = new THREE.Points(
@@ -372,7 +339,7 @@ export function createGlobeScene({ container, config }) {
     globe.add(group)
   }
 
-  let accentHex = 0x1a56db
+  let accentHex = 0x212121
 
   // Globe interaction states: idle / hover / selected. Hover lifts one beacon,
   // selection emphasizes it and de-emphasizes the rest so the chosen territory
@@ -524,22 +491,49 @@ export function createGlobeScene({ container, config }) {
   })
 
   
-  // ---- AI data center beacons ----------------------------------------------
+  // ---- AI data center labels -------------------------------------------------
+  // the site name floats over its pin, the same way analytics floats a value:
+  // one black chip, white text, sized to fit the name.
+  const CENTER_LABEL_W = 256
+  const CENTER_LABEL_H = 96
   const centerEntries = []
+
+  function paintCenterLabel(ctx, name) {
+    ctx.clearRect(0, 0, CENTER_LABEL_W, CENTER_LABEL_H)
+    ctx.textAlign = "center"
+    ctx.textBaseline = "middle"
+
+    let size = 40
+    ctx.font = `bold ${size}px "JetBrains Mono", monospace`
+    while (ctx.measureText(name).width > CENTER_LABEL_W - 36 && size > 12) {
+      size -= 2
+      ctx.font = `bold ${size}px "JetBrains Mono", monospace`
+    }
+
+    const width = Math.min(CENTER_LABEL_W, Math.ceil(ctx.measureText(name).width) + 24)
+    const height = Math.ceil(size * 1.7)
+    const x = (CENTER_LABEL_W - width) / 2
+    const y = (CENTER_LABEL_H - height) / 2
+
+    ctx.fillStyle = "#000000"
+    ctx.fillRect(x, y, width, height)
+
+    ctx.fillStyle = "#ffffff"
+    ctx.fillText(name, CENTER_LABEL_W / 2, CENTER_LABEL_H / 2 + 1)
+  }
 
   centers.forEach((center) => {
     const group = new THREE.Group()
     const surface = latLonToVector3(center.lat, center.lon, RADIUS * 1.002)
-    const top = latLonToVector3(center.lat, center.lon, RADIUS * 1.026)
+    const top = latLonToVector3(center.lat, center.lon, RADIUS * 1.03)
 
     const canvas = document.createElement("canvas")
-    canvas.width = CARD_W
-    canvas.height = CARD_W
+    canvas.width = CENTER_LABEL_W
+    canvas.height = CENTER_LABEL_H
     const ctx = canvas.getContext("2d")
-    drawCardBackdrop(ctx, CARD_W, CARD_W, 14)
-    paintServerGlyph(ctx)
+    paintCenterLabel(ctx, center.name)
 
-    const sprite = createSprite(canvas, 0.15, 0.15)
+    const sprite = createSprite(canvas, 0.3, 0.1125)
     sprite.position.copy(top)
     const ring = makeRing(surface, 0.014, 0.028, accentHex)
     const halo = center.weight > 1 ? makeRing(surface, 0.04, 0.05, accentHex) : null
@@ -582,7 +576,7 @@ export function createGlobeScene({ container, config }) {
     canvas.height = ANALYTICS_H
     const ctx = canvas.getContext("2d")
 
-    const sprite = createSprite(canvas, 0.24, 0.09)
+    const sprite = createSprite(canvas, 0.27, 0.10125)
     sprite.position.copy(top)
     const hit = makeHit(top, 0.09)
 
@@ -608,7 +602,8 @@ export function createGlobeScene({ container, config }) {
 
   // Each reading is a number on a solid black chip. The chip is deliberately
   // theme-independent: it reads the same on paper and on a dark globe, and it
-  // never collides with the accent colour the rest of the HUD is tuned to.
+  // never collides with the accent colour the rest of the HUD is tuned to. The
+  // value itself is tinted per nation, so neighbouring readings stay apart.
   function paintAnalytics(entry) {
     if (!entry.row) return
     const meta = config.metricMeta(entry.metric)
@@ -626,7 +621,7 @@ export function createGlobeScene({ container, config }) {
     ctx.textBaseline = "middle"
 
     // long values shrink rather than spill past the chip
-    let size = 44
+    let size = 50
     ctx.font = `bold ${size}px "JetBrains Mono", monospace`
     while (ctx.measureText(text).width > ANALYTICS_W - 40 && size > 16) {
       size -= 2
@@ -639,13 +634,19 @@ export function createGlobeScene({ container, config }) {
     const y = (ANALYTICS_H - height) / 2
 
     ctx.fillStyle = "#000000"
-    ctx.beginPath()
-    ctx.roundRect(x, y, width, height, height / 2)
-    ctx.fill()
+    ctx.fillRect(x, y, width, height)
 
-    ctx.fillStyle = "#ffffff"
+    ctx.fillStyle = countryTextColor(entry.descriptor.place.code)
     ctx.fillText(text, ANALYTICS_W / 2, ANALYTICS_H / 2 + 1)
     entry.sprite.material.map.needsUpdate = true
+  }
+
+  // A stable hue per ISO code: neighbouring nations never share a colour, and
+  // the mapping survives reloads because it hashes the code rather than a seed.
+  function countryTextColor(code) {
+    let hash = 0
+    for (let i = 0; i < code.length; i += 1) hash = (hash * 31 + code.charCodeAt(i)) >>> 0
+    return `hsl(${hash % 360} 90% 70%)`
   }
 
   // ---- user polaroids -------------------------------------------------------
@@ -1146,7 +1147,6 @@ function drawPolaroidCard(ctx, img, label) {
         entry.pin.material.color.setHex(theme.border)
         entry.halo?.material.color.setHex(theme.border)
       })
-      analyticsEntries.forEach(paintAnalytics)
     },
 
     // ---- halftone calibration -------------------------------------------
