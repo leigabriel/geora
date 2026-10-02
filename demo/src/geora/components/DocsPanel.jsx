@@ -9,7 +9,7 @@ const SECTIONS = [
     body: [
       'Geora is a spatial visualization interface built around one interactive halftone globe — rotate it, zoom it, tap the beacons pinned to every nation. Its engine ships independently as geora-globe: a framework-agnostic Three.js point-cloud planet presented as a custom element and as a JavaScript class.',
       'Setup: npm install geora-globe, import it once — the import registers <geora-globe> — and drop the tag into any page. No React, no Tailwind, no build step required.',
-      'How it works: the element fills its parent and mounts the renderer inside its shadow root. Configuration flows in through attributes, properties and data; interactions flow out as bubbling geora-* CustomEvents with plain JSON payloads. A theme recolours the stage, a mode swaps which layer is on screen.',
+      'How it works: the element fills its parent and mounts the renderer inside its shadow root. Configuration flows in through attributes, properties and data; interactions flow out as bubbling geora-* CustomEvents with plain JSON payloads. A theme recolours the globe — never the page background — and a mode swaps which layer is on screen.',
       'Styles live in the component shadow DOM, so nothing leaks: the package emits no global CSS and page styles cannot reach in. The only runtime dependencies are three, d3-geo and topojson-client.',
       'This demo consumes the package exactly like an external consumer: it imports the geora-globe specifier and never reaches into the package source.',
     ],
@@ -66,7 +66,7 @@ const SECTIONS = [
     title: 'Themes',
     body: [
       'Six built-ins: paper (PAPER WHITE), dark (INK BLACK), amber (AMBER SCREEN), matrix (PHOSPHOR GREEN), blueprint (BLUEPRINT GRID) and dusk (DUSK VIOLET). Set the theme attribute or assign the theme property.',
-      'A theme repaints the globe stage only — backdrop, sphere, dots and beacons. The component HUD and your page chrome keep their own palette, so a dark globe never drags the interface into unreadable contrast.',
+      'A theme repaints the globe itself — sphere, dots, beacons and country outlines. The page background never changes: the stage stays on its default paper backdrop, so the overall look remains paper whichever theme is active. The component HUD and your page chrome keep their own palette, so a dark globe never drags the interface into unreadable contrast. geora-theme-change carries the theme background if you want to apply it to your page yourself.',
       'A custom theme is a plain object — { label, background, globe, foreground, accent, border } in #rrggbb, #rgb or 0xRRGGBB — assigned to the theme property. Missing colours fall back, so a partial theme stays legible. THEMES, THEME_KEYS, nextTheme() and themeHex() are exported for your own picker.',
     ],
   },

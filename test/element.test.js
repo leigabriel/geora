@@ -310,6 +310,23 @@ describe("HUD chrome behaviour", () => {
     byAction(root, "detail").click()
     expect(el.detail).toBe(0)
   })
+
+  it("keeps the stage background at its default when the theme changes", () => {
+    const el = mount()
+    const themeChange = vi.fn()
+    el.addEventListener("geora-theme-change", themeChange)
+    expect(stage(el).style.getPropertyValue("--geora-stage-bg")).toBe("")
+
+    el.theme = "dark"
+    expect(stage(el).style.getPropertyValue("--geora-stage-bg")).toBe("")
+    expect(themeChange).toHaveBeenCalledTimes(1)
+    const detail = themeChange.mock.calls[0][0].detail
+    expect(detail.key).toBe("dark")
+    expect(detail.theme.background).toMatch(/^#/)
+
+    el.theme = "paper"
+    expect(stage(el).style.getPropertyValue("--geora-stage-bg")).toBe("")
+  })
 })
 
 describe("events driving the built-in UI", () => {

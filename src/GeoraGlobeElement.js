@@ -404,7 +404,6 @@ export class GeoraGlobeElement extends HTMLElementBase {
     })
     this.addEventListener("geora-theme-change", (event) => {
       if (event.target !== this) return
-      this.#applyStageBackground(event.detail?.theme)
       this.#syncSettingsPressed()
     })
     this.addEventListener("geora-reset", (event) => {
@@ -432,22 +431,6 @@ export class GeoraGlobeElement extends HTMLElementBase {
     })
     this.#syncChrome()
     this.#globe.start()
-    this.#applyStageBackground()
-  }
-
-  // The canvas is transparent, so the theme's backdrop is painted by the stage
-  // element itself: hex string from a built-in key, or the public colour object
-  // for a custom theme.
-  #applyStageBackground(publicTheme) {
-    if (!this.#stage || !this.#globe) return
-    let hex = publicTheme?.background
-    if (!hex) {
-      const theme = this.#globe.theme
-      hex = typeof theme === "string"
-        ? themeHex(THEMES[theme]?.background ?? THEMES[DEFAULT_THEME].background)
-        : theme?.background
-    }
-    if (hex) this.#stage.style.setProperty("--geora-stage-bg", hex)
   }
 
   disconnectedCallback() {

@@ -36,9 +36,9 @@ same planet. This repository holds both:
    parent and mounts a Three.js renderer inside its shadow root — page styles
    and component styles cannot leak either way.
 2. The planet is a GPU point cloud: land, borders and beacons are dots shaded
-   by a halftone shader. A `theme` recolours the stage (backdrop, sphere, dots,
-   beacons); a `mode` swaps which layer is on screen (countries, polaroids,
-   analytics, AI centers, host markers).
+   by a halftone shader. A `theme` recolours the globe (sphere, dots, borders,
+   beacons) — never the page background; a `mode` swaps which layer is on
+   screen (countries, polaroids, analytics, AI centers, host markers).
 3. Configuration flows in through attributes, properties and the `data`
    property; interactions flow out as bubbling `geora-*` `CustomEvent`s with
    plain-data payloads. That is the whole contract — any framework, or plain
@@ -67,17 +67,27 @@ the only runtime dependencies are `three`, `d3-geo` and `topojson-client`.
   <head>
     <script
       type="module"
-      src="https://cdn.jsdelivr.net/npm/geora-globe@0.1.0/+esm"
+      src="https://cdn.jsdelivr.net/npm/geora-globe@0.1.1/+esm"
     ></script>
   </head>
   <body style="margin: 0; height: 100vh">
-    <geora-globe theme="dark" mode="country" auto-rotate></geora-globe>
+    <geora-globe
+      theme="dark"
+      mode="country"
+      auto-rotate
+      minimal
+    ></geora-globe>
   </body>
 </html>
 ```
 
 Importing the package registers `<geora-globe>` once. The element fills its
-parent, so give it — or an ancestor — a size.
+parent, so give it — or an ancestor — a size. `minimal` renders the globe
+alone: no Reset / Spin buttons, no layer navigation, no tooltip or card —
+everything is customized from the tag itself. Remove it to bring the built-in
+HUD back, or pick pieces individually with the `show-*` attributes
+(`show-controls`, `show-navigation`, `show-tooltip`, `show-info-card`,
+`show-settings`).
 
 ### JavaScript (any bundler)
 
@@ -157,7 +167,7 @@ A complete page in five steps — no build step required:
 <!DOCTYPE html>
 <html>
   <head>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/geora-globe@0.1.0/+esm"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/geora-globe@0.1.1/+esm"></script>
     <style>geora-globe { display: block; width: 100vw; height: 100vh }</style>
   </head>
   <body>
@@ -300,7 +310,7 @@ All events are `CustomEvent`s that bubble and cross shadow boundaries
 | `geora-sphere-select` | `{ lat, lon, onLand, country, distanceKm, x, y }` — a tap on the bare sphere |
 | `geora-clear` | `{}` — the selection was cleared (also fired when the mode changes) |
 | `geora-mode-change` | `{ mode, modes }` — the active layer or the mode list changed |
-| `geora-theme-change` | `{ theme, key }` — theme changed; `theme` is the public colour object, `key` is `null` for custom themes |
+| `geora-theme-change` | `{ theme, key }` — theme changed; `theme` is the public colour object, `key` is `null` for custom themes. Its `background` is advisory - the element never paints it |
 | `geora-reset` | `{}` — `reset()` ran |
 
 ```js
@@ -379,11 +389,14 @@ offline-safe out of the box.
 
 ## Themes
 
-Themes repaint the globe stage only — backdrop, sphere, dots, beacons. The
-component's own HUD and your page chrome keep their own palette, so a dark
-globe never drags the interface into unreadable contrast.
+Themes repaint the globe itself — sphere, dots, beacons and country outlines.
+The page background never changes: the component's stage stays on its default
+paper backdrop, so the overall look remains paper whichever theme is active and
+a dark globe simply sits on your own page colours. The component's own HUD and
+your page chrome keep their palette too, so a dark globe never drags the
+interface into unreadable contrast.
 
-| Key | Label | Background | Foreground | Accent |
+| Key | Label | Background (advisory) | Foreground | Accent |
 | --- | --- | --- | --- | --- |
 | `paper` | PAPER WHITE | `#ffffff` | `#121316` | `#1a56db` |
 | `dark` | INK BLACK | `#07080a` | `#ffffff` | `#00ffaa` |
@@ -391,6 +404,11 @@ globe never drags the interface into unreadable contrast.
 | `matrix` | PHOSPHOR GREEN | `#020a04` | `#00ff66` | `#88ffbb` |
 | `blueprint` | BLUEPRINT GRID | `#061225` | `#cfe4ff` | `#4da3ff` |
 | `dusk` | DUSK VIOLET | `#120a1e` | `#e8dcff` | `#b08cff` |
+
+The Background colour is advice for your page, not something the component
+paints. Want full-page theming? Apply it yourself from the
+`geora-theme-change` payload, or set `--geora-stage-bg` in your own CSS —
+customization stays inside your code.
 
 A custom theme is a plain object — `#rrggbb`, `#rgb` or `0xRRGGBB` values,
 missing colours fall back so a partial theme stays legible:
@@ -500,7 +518,7 @@ geora-globe {
   --geora-font: 'JetBrains Mono', monospace;
   --geora-accent: #ff5c00;
   --geora-radius: 4px;
-  --geora-stage-bg: #101014; /* pre-theme backdrop */
+  --geora-stage-bg: #101014; /* page backdrop — themes never change it */
 }
 ```
 

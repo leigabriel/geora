@@ -1,11 +1,15 @@
-// Themes describe the globe stage and nothing else: the backdrop behind the
-// sphere, the sphere the dot cloud is painted on, and the beacons that sit on
-// it. Everything else — host page chrome, or the component's own optional
-// controls — keeps its own palette, so a dark globe never drags the interface
-// into unreadable contrast.
+// Themes describe the globe itself and nothing else: the sphere the dot cloud
+// is painted on, the dots, the country outlines and the beacons that sit on
+// it. The host page backdrop never changes — the component's stage stays on
+// its default paper backdrop — so a dark globe sits on your own page colours
+// and the overall default look remains paper. Everything else — host page
+// chrome, or the component's own optional controls — keeps its own palette,
+// so a dark globe never drags the interface into unreadable contrast.
 //
 // A theme holds five colours:
-//   background  the stage backdrop
+//   background  the host page backdrop the theme suggests; advisory only —
+//               the element never paints it (hosts may apply it themselves
+//               through --geora-stage-bg or geora-theme-change)
 //   globe       the sphere (falls back to background)
 //   foreground  the dot colour
 //   accent      the beacon / highlight colour
