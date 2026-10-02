@@ -33,3 +33,4 @@ test-results
 playwright-report
 *-profile
 chrome-*
+test.html
