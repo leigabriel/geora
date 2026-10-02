@@ -16,7 +16,7 @@ import { METRICS, metricMeta, buildAnalytics, metricRange, normalizeMetric, rank
 //   centers:  [{ id, name, operator, code, lat, lon, tier, powerGW, status, focus }],
 //   landmarks:[{ iso2, caption, lat, lon }],
 //   modes:    [{ key, label, icon, hint }],
-//   themes:   { key: { label, bg, fg, border, scan, body } },
+//   themes:   { key: { label, bg, globe, fg, border } },
 // }
 export const config = {
   places: COUNTRIES_DATA,
