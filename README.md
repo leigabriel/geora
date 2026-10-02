@@ -153,14 +153,14 @@ public/                      favicon, flags, fonts, landmarks
 src/geora/
   Geora.jsx        app shell, state, layer wiring, persistence
   config.js        single source of truth: places, layers, themes, defaults
-  geora.css        theme variables, font faces and base styles
+  geora.css        chrome palette, font faces and base styles
   data/countries.js  nation data
   data/centers.js     AI compute campuses
   data/landmarks.js   landmark photographs, one per nation
   lib/scene.js     three.js scene, map, layers, raycast, render loop
   lib/controls.js  drag, wheel, pinch and raycast input
   lib/audio.js     tone.js sfx
-  lib/themes.js    themes
+  lib/themes.js    globe theme palettes
   lib/modes.js     globe layer registry
   lib/analytics.js modeled telemetry
   lib/rand.js      seeded rng and id helpers
