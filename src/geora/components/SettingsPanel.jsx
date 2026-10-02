@@ -1,4 +1,4 @@
-import { THEMES } from '../lib/themes.js'
+import { THEMES, themeHex } from '../lib/themes.js'
 
 function Slider({ label, value, min, max, step, display, onChange }) {
   return (
@@ -27,7 +27,7 @@ function Toggle({ label, hint, checked, onChange }) {
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex w-full items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-left text-[12px] transition-colors hover:bg-(--border-color)"
+      className="flex w-full items-center justify-between gap-3 px-2 py-1.5 text-left text-[12px] transition-colors hover:bg-(--border-color)"
     >
       <span className="flex flex-col">
         <span>{label}</span>
@@ -109,7 +109,10 @@ export default function SettingsPanel({
 
         <div className="custom-scroll flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain pr-1 select-text">
 
-        <Section title="Display" note="Globe detail, marker visibility and theme.">
+        <Section
+          title="Display"
+          note="Globe detail, marker visibility and theme. A theme repaints the globe stage; the interface keeps its own palette so text stays readable."
+        >
           <div className="grid grid-cols-2 gap-1.5" role="group" aria-label="Theme">
             {Object.entries(THEMES).map(([key, theme]) => (
               <button
@@ -118,20 +121,20 @@ export default function SettingsPanel({
                 onClick={() => onTheme(key)}
                 aria-pressed={themeKey === key}
                 aria-label={`Theme ${theme.label}`}
-                className={`flex min-h-[2.5rem] items-center gap-2 rounded-lg border px-2 py-1.5 text-left text-[11px] transition-colors ${
+                className={`flex min-h-[2.5rem] items-center gap-2 border px-2 py-1.5 text-left text-[11px] transition-colors ${
                   themeKey === key
                     ? 'border-(--accent-color) text-(--accent-color)'
                     : 'border-(--border-color) opacity-75 hover:opacity-100'
                 }`}
               >
                 <span
-                  className="h-4 w-4 shrink-0 rounded-full border"
+                  className="h-4 w-4 shrink-0 rounded-full border-2"
                   aria-hidden="true"
-                  style={{ background: `#${theme.bg.toString(16).padStart(6, '0')}` }}
+                  style={{ background: themeHex(theme.bg), borderColor: themeHex(theme.border) }}
                 />
                 <span className="min-w-0">
                   <span className="block truncate font-bold">{theme.label}</span>
-                  <span className="block truncate text-[9px] opacity-55">#{theme.border.toString(16).padStart(6, '0')}</span>
+                  <span className="block truncate text-[9px] opacity-55">{themeHex(theme.border)}</span>
                 </span>
               </button>
             ))}
@@ -167,7 +170,7 @@ export default function SettingsPanel({
                   onClick={() => setProfile({ detail: index })}
                   aria-pressed={profile.detail === index}
                   aria-label={`Detail ${label}`}
-                  className={`min-h-[2.25rem] flex-1 rounded-lg border py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                  className={`min-h-[2.25rem] flex-1 border py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${
                     profile.detail === index
                       ? 'border-(--accent-color) text-(--accent-color)'
                       : 'border-(--border-color) opacity-70 hover:opacity-100'
@@ -178,7 +181,7 @@ export default function SettingsPanel({
               ))}
             </div>
           </div>
-          <details className="rounded-lg border border-(--border-color) px-2 py-1.5">
+          <details className="border border-(--border-color) px-2 py-1.5">
             <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-wider opacity-80">
               Halftone calibration
             </summary>
