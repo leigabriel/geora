@@ -22,3 +22,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Build output
+demo-dist
+
+# Local and test-only artifacts — never committed
+*.tgz
+.vercel
+test-results
+playwright-report
+*-profile
+chrome-*

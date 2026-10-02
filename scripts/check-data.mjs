@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs'
 
-const centers = readFileSync('src/geora/data/centers.js', 'utf8')
-const countries = readFileSync('src/geora/data/countries.js', 'utf8')
-const landmarks = readFileSync('src/geora/data/landmarks.js', 'utf8')
+const centers = readFileSync('src/data/centers.js', 'utf8')
+const countries = readFileSync('src/data/countries.js', 'utf8')
+const landmarks = readFileSync('src/data/landmarks.js', 'utf8')
 
 const codes = [...centers.matchAll(/code: "([A-Z]{3})"/g)].map((m) => m[1])
 const ids = [...centers.matchAll(/id: "([^"]+)"/g)].map((m) => m[1])

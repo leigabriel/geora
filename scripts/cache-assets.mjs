@@ -1,14 +1,17 @@
 // Caches the runtime assets Geora needs so the app runs with no network access:
-// the country flag PNGs and the JetBrains Mono font. Run it after changing the
-// nation list in src/geora/data/countries.js:  npm run assets
+// the country flag PNGs and the UI fonts. Run it after changing the nation list
+// in src/data/countries.js:  npm run assets
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const CHROME_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-const FONT_CSS = 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap'
-const FONT_FILE = 'public/fonts/jetbrains-mono-latin.woff2'
+// One css2 request per family; each needs a browser UA to return woff2 URLs.
+const FONTS = [
+  ['JetBrains+Mono:wght@400;500;600;700', 'public/fonts/jetbrains-mono-latin.woff2'],
+  ['Geist+Pixel', 'public/fonts/geist-pixel.woff2'],
+]
 const FLAG_SIZES = [
   ['https://flagcdn.com/w40/{code}.png', 'public/flags'],
   ['https://flagcdn.com/w160/{code}.png', 'public/flags'],
@@ -23,18 +26,20 @@ async function save(url, target, headers = {}) {
   return body.byteLength
 }
 
-async function cacheFont() {
-  const css = await (await fetch(FONT_CSS, { headers: { 'User-Agent': CHROME_UA } })).text()
-  // Google returns one @font-face per subset; geora only ships the latin one.
-  const block = css.split('@font-face').find((part) => part.includes('U+0000-00FF'))
-  const url = block?.match(/url\((https:[^)]+\.woff2)\)/)?.[1]
-  if (!url) throw new Error('could not resolve the JetBrains Mono latin subset')
-  const bytes = await save(url, path.join(root, FONT_FILE), { 'User-Agent': CHROME_UA })
-  console.log(`font   ${FONT_FILE} ${(bytes / 1024).toFixed(1)} kB`)
+async function cacheFonts() {
+  for (const [family, file] of FONTS) {
+    const css = await (await fetch(`https://fonts.googleapis.com/css2?family=${family}&display=swap`, { headers: { 'User-Agent': CHROME_UA } })).text()
+    // Google returns one @font-face per subset; geora only ships the latin one.
+    const block = css.split('@font-face').find((part) => part.includes('U+0000-00FF'))
+    const url = block?.match(/url\((https:[^)]+\.woff2)\)/)?.[1]
+    if (!url) throw new Error(`could not resolve the ${family} latin subset`)
+    const bytes = await save(url, path.join(root, file), { 'User-Agent': CHROME_UA })
+    console.log(`font   ${file} ${(bytes / 1024).toFixed(1)} kB`)
+  }
 }
 
 async function cacheFlags() {
-  const source = await readFile(path.join(root, 'src/geora/data/countries.js'), 'utf8')
+  const source = await readFile(path.join(root, 'src/data/countries.js'), 'utf8')
   const codes = [...new Set([...source.matchAll(/iso2:\s*"([a-z]{2})"/g)].map((match) => match[1]))]
   let bytes = 0
   for (const code of codes) {
@@ -46,6 +51,6 @@ async function cacheFlags() {
   console.log(`flags  ${codes.length} nations ${(bytes / 1024).toFixed(1)} kB`)
 }
 
-await cacheFont()
+await cacheFonts()
 await cacheFlags()
 console.log('assets cached in public/')

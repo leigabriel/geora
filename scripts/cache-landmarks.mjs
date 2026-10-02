@@ -1,5 +1,5 @@
 // Downloads the polaroid layer's photographs: one iconic landmark per nation in
-// src/geora/data/countries.js, pulled from the English Wikipedia page for that
+// src/data/countries.js, pulled from the English Wikipedia page for that
 // landmark. Run it after changing LANDMARKS below:  npm run landmarks
 //
 // Each file lands in public/landmarks/<iso2>.jpg. Coordinates come from the same
