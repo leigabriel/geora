@@ -1,16 +1,17 @@
-import { MODE_KEYS, modeMeta } from '../lib/modes.js'
+import { modeMeta } from 'geora-globe'
 
-export default function SelectionNav({ mode, onMode }) {
-  const index = Math.max(0, MODE_KEYS.indexOf(mode))
-  const total = MODE_KEYS.length
+export default function SelectionNav({ modes, mode, onMode }) {
+  const list = modes?.length ? modes : [mode]
+  const index = Math.max(0, list.indexOf(mode))
+  const total = list.length
   const active = modeMeta(mode)
 
   const goLeft = () => {
-    onMode(MODE_KEYS[(index - 1 + total) % total])
+    onMode(list[(index - 1 + total) % total])
   }
 
   const goRight = () => {
-    onMode(MODE_KEYS[(index + 1) % total])
+    onMode(list[(index + 1) % total])
   }
 
   return (

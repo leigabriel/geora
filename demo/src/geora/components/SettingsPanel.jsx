@@ -1,4 +1,4 @@
-import { THEMES, themeHex } from '../lib/themes.js'
+import { THEMES, themeHex } from 'geora-globe'
 
 function Slider({ label, value, min, max, step, display, onChange }) {
   return (

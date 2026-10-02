@@ -7,6 +7,7 @@ const TAGS = {
   center: 'AI CENTER',
   analytics: 'TELEMETRY',
   polaroid: 'PHOTO',
+  marker: 'MARKER',
 }
 
 export default function BeaconTooltip({ hover }) {
@@ -15,15 +16,19 @@ export default function BeaconTooltip({ hover }) {
 
   const target = hover?.target
   if (!target) return null
-  const place = target.place ?? null
-  const tag = TAGS[target.kind] ?? TAGS.country
+  const place = target.country ?? null
+  const tag = TAGS[target.kind] ?? TAGS.marker
   const headline =
-    target.kind === 'country' ? place?.country : (target.photo?.caption ?? target.center?.name)
+    target.kind === 'country'
+      ? place?.country
+      : target.kind === 'marker'
+        ? target.marker?.name
+        : (target.landmark?.caption ?? target.center?.name ?? place?.country)
   const detail =
     target.kind === 'country'
       ? place?.name
       : target.kind === 'polaroid'
-        ? (target.photo?.country ?? tag)
+        ? (target.landmark?.country ?? tag)
         : tag
 
   return (

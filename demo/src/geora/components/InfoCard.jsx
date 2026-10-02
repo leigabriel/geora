@@ -81,7 +81,7 @@ export default function InfoCard({ card, config, onClose }) {
     if (!card) return null
 
     const target = card.target
-    const place = target.place ?? null
+    const place = target.country ?? null
     // Popups grow out of the tapped point: origin sits on the edge facing it.
     const originBelow = (card?.y ?? 0) < (typeof window === 'undefined' ? 0 : window.innerHeight * 0.4)
     const frame = (body, label = 'Details') => (
@@ -108,29 +108,29 @@ export default function InfoCard({ card, config, onClose }) {
     )
 
     if (target.kind === 'polaroid') {
-        const { photo } = target
+        const landmark = target.landmark
         // the photo is filed under a nation, but it is pinned at the landmark, so the
         // card names the landmark and reads its coordinates rather than the capital's
-        const photoPlace = place ?? config.places.find((item) => item.code === photo.code) ?? null
+        const photoPlace = config.places.find((item) => item.code === landmark.code) ?? null
         return frame(
             <Shell
                 kind="Polaroid"
-                title={photo.caption ?? photoPlace?.country ?? 'Photograph'}
+                title={landmark.caption ?? photoPlace?.country ?? 'Photograph'}
                 subtitle={photoPlace ? `${photoPlace.country} · ${photoPlace.name}` : null}
                 flag={photoPlace ? <Flag place={photoPlace} className="h-6 w-9 shadow-md" /> : null}
                 onClose={onClose}
             >
                 <img
-                    src={photo.src}
-                    alt={photo.caption ?? `Photograph from ${photo.country ?? 'a nation'}`}
+                    src={landmark.image}
+                    alt={landmark.caption ?? `Photograph from ${landmark.country ?? 'a nation'}`}
                     className="mt-1.5 h-26 w-full object-cover border border-white/20"
                 />
                 <Stats
                     rows={[
-                        ['Landmark', photo.caption ?? '—'],
-                        ['Country', photo.country ?? '—'],
-                        ['Lat', formatCoord(photo.lat)],
-                        ['Lon', formatCoord(photo.lon)],
+                        ['Landmark', landmark.caption ?? '—'],
+                        ['Country', landmark.country ?? '—'],
+                        ['Lat', formatCoord(landmark.lat)],
+                        ['Lon', formatCoord(landmark.lon)],
                     ]}
                 />
                 <p className="mt-2 line-clamp-2 text-[10px] leading-snug text-white/70">
