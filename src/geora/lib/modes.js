@@ -5,7 +5,7 @@ export const MODES = [
   { key: 'country', label: 'COUNTRIES', icon: 'fa-earth-americas', hint: 'Tap a beacon to inspect a nation' },
   { key: 'polaroid', label: 'POLAROIDS', icon: 'fa-image', hint: 'One landmark per nation, pinned where it stands' },
   { key: 'analytics', label: 'ANALYTICS', icon: 'fa-chart-column', hint: 'Modeled telemetry per nation' },
-  { key: 'centers', label: 'AI CENTERS', icon: 'fa-server', hint: 'Announced AI compute campuses' },
+  { key: 'centers', label: 'AI DATA CENTERS', icon: 'fa-server', hint: 'Announced AI compute campuses' },
 ]
 
 export const MODE_KEYS = MODES.map((mode) => mode.key)
