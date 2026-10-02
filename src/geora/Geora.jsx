@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './geora.css'
 import config, { MODE_KEYS } from './config.js'
+import { themeHex } from './lib/themes.js'
 import { createGlobeScene } from './lib/scene.js'
 import { bindControls } from './lib/controls.js'
 import { buildAnalytics } from './lib/analytics.js'
 import { createAudio } from './lib/audio.js'
 import TopBar from './components/TopBar.jsx'
 import SelectionNav from './components/SelectionNav.jsx'
-import ActionBar from './components/ActionBar.jsx'
 import InfoCard from './components/InfoCard.jsx'
 import BeaconTooltip from './components/BeaconTooltip.jsx'
 import SettingsPanel from './components/SettingsPanel.jsx'
@@ -68,6 +68,11 @@ export default function Geora() {
   // one photograph per nation, at the coordinates of the landmark it shows
   const photos = useMemo(() => config.buildPolaroids(config.places), [])
   const audio = useMemo(() => createAudio(), [])
+  // The active theme paints the globe stage only: the backdrop under the canvas
+  // plus the scene itself. The HUD chrome never follows it, so panels, modals
+  // and text keep their fixed Paper White contrast whatever is picked here.
+  const theme = config.themes[prefs.theme] ?? config.themes[config.defaultTheme]
+  const stageBg = themeHex(theme.bg)
 
   // ---- card lifecycle --------------------------------------------------------
   const dismissCard = useCallback(() => {
@@ -115,15 +120,6 @@ export default function Geora() {
     setSettingsOpen((open) => !open)
   }, [dismissCard])
 
-  const handleCenter = useCallback((place) => {
-    const scene = sceneRef.current
-    if (!scene || place?.lat == null) return
-    // only the first focus is snapshotted, so a second card cannot hand the
-    // globe back to the wrong place
-    if (!restoreRef.current) restoreRef.current = scene.snapshot()
-    scene.flyTo(place)
-  }, [])
-
   // ---- scene lifecycle -------------------------------------------------------
   useEffect(() => {
     const container = containerRef.current
@@ -132,7 +128,7 @@ export default function Geora() {
     const scene = createGlobeScene({ container, config })
     sceneRef.current = scene
     scene.start()
-    scene.setTheme(config.themes[prefs.theme] ?? config.themes[config.defaultTheme])
+    scene.setTheme(theme)
     scene.setHalftone(prefs.halftone)
     scene.setGlobeScale(prefs.profile.globeScale)
     scene.setMarkerScale(prefs.profile.markerScale)
@@ -190,11 +186,11 @@ export default function Geora() {
     audio.setEnabled(prefs.sound)
   }, [audio, prefs.sound])
 
+  // a theme switch repaints the scene only; `theme` also feeds --stage-bg on the
+  // container, so the backdrop behind the canvas and the globe move together
   useEffect(() => {
-    const theme = config.themes[prefs.theme] ?? config.themes[config.defaultTheme]
-    document.body.className = theme.body
     sceneRef.current?.setTheme(theme)
-  }, [prefs.theme])
+  }, [theme])
 
   useEffect(() => {
     const scene = sceneRef.current
@@ -270,7 +266,13 @@ export default function Geora() {
   }, [dismissCard, selectMode, handleStep, toggleDocs, setHud, docsOpen, settingsOpen, hudVisible])
 
   return (
-    <div ref={containerRef} className="relative h-full w-full overflow-hidden" role="application" aria-label="Geora interactive globe">
+    <div
+      ref={containerRef}
+      className="geora-stage relative h-full w-full overflow-hidden"
+      style={{ '--stage-bg': stageBg }}
+      role="application"
+      aria-label="Geora interactive globe"
+    >
       {hudVisible ? (
         <>
           <TopBar docsOn={docsOpen} settingsOn={settingsOpen} onDocs={toggleDocs} onSettings={toggleSettings} />
@@ -289,20 +291,10 @@ export default function Geora() {
             }}
           />
 
-          {/* The layer readout sits above the dock. It reports what the running
-              layer holds and nothing else: every choice a host might want to
-              expose is declared in config.js instead of being made here. */}
-          <div
-            className="pointer-events-none fixed inset-x-0 z-20 flex flex-col items-center gap-2 px-3"
-            style={{ bottom: 'calc(var(--hud-safe-bottom) + 3rem)' }}
-          >
-            <div
-              data-ui
-              className="bit-panel geora-dock flex w-full max-w-[min(42rem,calc(100vw-1.5rem))] flex-col items-center gap-2 rounded-2xl border px-3 py-2 sm:px-4"
-            >
-              <ActionBar mode={mode} config={config} analytics={analytics} />
-            </div>
-
+          {/* The layer nav shares the corner controls' baseline on wide screens
+              and stacks above them on narrow ones: Reset/Spin bottom-left, the
+              eye bottom-right, the nav between. */}
+          <div className="bottom-nav-slot pointer-events-none fixed inset-x-0 z-20 flex justify-center px-3">
             <SelectionNav mode={mode} onMode={selectMode} />
           </div>
         </>
@@ -312,7 +304,7 @@ export default function Geora() {
       <BeaconTooltip hover={hover} />
 
       {card ? (
-        <InfoCard card={card} config={config} onClose={dismissCard} onCenter={handleCenter} />
+        <InfoCard card={card} config={config} onClose={dismissCard} />
       ) : null}
 
       <SettingsPanel
