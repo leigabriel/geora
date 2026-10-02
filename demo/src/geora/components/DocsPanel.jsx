@@ -3,7 +3,7 @@
 // prose, so a developer can find one line while the globe is on screen. It
 // follows README.md and documents only the public geora-globe API.
 const README_URL = 'https://raw.githubusercontent.com/leigabriel/geora/master/README.md'
-const VERSION = '0.1.1'
+const VERSION = '0.2.0'
 const CDN = `https://cdn.jsdelivr.net/npm/geora-globe@${VERSION}/+esm`
 
 const SECTIONS = [
@@ -270,7 +270,7 @@ export default function DocsPanel({ open, onClose }) {
         role="dialog"
         aria-modal="true"
         aria-label="Geora documentation"
-        className={`bit-panel slide-right fixed inset-y-0 right-0 z-60 flex w-[92vw] max-w-170 flex-col border-l shadow-2xl sm:w-[min(680px,86vw)] ${
+        className={`bit-panel slide-right fixed inset-y-0 right-0 z-60 flex w-[94vw] max-w-260 flex-col border-l shadow-2xl sm:w-[min(960px,92vw)] ${
           open ? '' : 'pointer-events-none'
         }`}
       >

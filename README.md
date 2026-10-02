@@ -1,4 +1,4 @@
-# geora-globe
+# Geora
 
 A framework-agnostic 3D halftone globe for the web: tens of thousands of
 shader-lit points forming a planet you can rotate, zoom and inspect, with a
@@ -7,6 +7,8 @@ beacon pinned to every nation.
 ```html
 <geora-globe theme="paper" mode="country" auto-rotate></geora-globe>
 ```
+
+<img src="public/globe.png" alt="The Geora globe with flag beacons pinned to every nation" width="1200" />
 
 No React, no Tailwind, no build step. Styles are isolated in the shadow DOM; the
 only runtime dependencies are `three`, `d3-geo` and `topojson-client`.
@@ -26,7 +28,7 @@ Tarball ≈ 460 kB; the ESM bundle is ≈ 272 kB (≈ 76 kB gzipped).
 <!DOCTYPE html>
 <html>
   <head>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/geora-globe@0.1.1/+esm"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/geora-globe@0.2.0/+esm"></script>
   </head>
   <body style="margin: 0; height: 100vh">
     <geora-globe theme="dark" mode="country" auto-rotate minimal></geora-globe>
