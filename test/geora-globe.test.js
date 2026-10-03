@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { GeoraGlobe, defaultCountries, defaultCenters, defaultLandmarks } from "geora-globe"
+import { GeoraGlobe, defaultCountries, defaultCenters, defaultLandmarks, bundledFlag, bundledFlagCodes } from "geora-globe"
 import { sceneFactory, stubMatchMedia } from "./helpers.js"
 
 function mount(options = {}) {
@@ -40,6 +40,64 @@ describe("GeoraGlobe defaults", () => {
     globe.start()
     expect(ready).toHaveBeenCalledTimes(1)
     globe.destroy()
+  })
+
+  it("reports ready and resolves whenReady()", async () => {
+    const { globe } = mount()
+    expect(globe.ready).toBe(false)
+
+    const pending = globe.whenReady()
+    globe.start()
+    expect(globe.ready).toBe(true)
+    await expect(pending).resolves.toBe(globe)
+    // idempotent once ready
+    await expect(globe.whenReady()).resolves.toBe(globe)
+    globe.destroy()
+  })
+
+  it("resolves whenReady() for a globe destroyed before it started", async () => {
+    const { globe } = mount()
+    const pending = globe.whenReady()
+    globe.destroy()
+    await expect(pending).resolves.toBe(globe)
+  })
+})
+
+describe("bundled flags", () => {
+  // How a flag URL is spelled depends on the build: vitest serves the raw
+  // module path, the library build inlines a data URI. What matters here is
+  // that every code resolves to a real reference and that an unknown one does
+  // not. That the shipped bundle uses self-contained data URIs is asserted
+  // against the packed tarball instead.
+  const isUsableUrl = (url) => typeof url === "string" && url.length > 0
+
+  it("resolves a flag for every bundled ISO alpha-2 code", () => {
+    const codes = bundledFlagCodes()
+    expect(codes.length).toBeGreaterThan(40)
+    for (const code of codes) {
+      expect(isUsableUrl(bundledFlag(code)), code).toBe(true)
+      expect(isUsableUrl(bundledFlag(code, true)), code).toBe(true)
+      // the two densities are different files, not one standing in for both
+      expect(bundledFlag(code, true), code).not.toBe(bundledFlag(code))
+    }
+  })
+
+  it("codes each density once", () => {
+    const codes = bundledFlagCodes()
+    expect(new Set(codes).size).toBe(codes.length)
+    expect(codes.every((code) => !code.includes("@"))).toBe(true)
+  })
+
+  it("covers every country in the default dataset", () => {
+    for (const country of defaultCountries) {
+      expect(isUsableUrl(bundledFlag(country.iso2)), country.iso2).toBe(true)
+    }
+  })
+
+  it("returns null for unknown codes rather than a broken url", () => {
+    expect(bundledFlag("zz")).toBeNull()
+    expect(bundledFlag("")).toBeNull()
+    expect(bundledFlag(undefined)).toBeNull()
   })
 })
 
