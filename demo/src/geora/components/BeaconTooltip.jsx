@@ -5,7 +5,7 @@ import Flag from './Flag.jsx'
 const TAGS = {
   country: 'BEACON',
   center: 'AI CENTER',
-  analytics: 'TELEMETRY',
+  analytics: 'MODELED',
   polaroid: 'PHOTO',
   marker: 'MARKER',
 }
@@ -26,10 +26,12 @@ export default function BeaconTooltip({ hover }) {
         : (target.landmark?.caption ?? target.center?.name ?? place?.country)
   const detail =
     target.kind === 'country'
-      ? place?.name
-      : target.kind === 'polaroid'
-        ? (target.landmark?.country ?? tag)
-        : tag
+      ? place?.capital
+      : target.kind === 'analytics'
+        ? 'simulated telemetry'
+        : target.kind === 'polaroid'
+          ? (target.landmark?.country ?? tag)
+          : tag
 
   return (
     <div
