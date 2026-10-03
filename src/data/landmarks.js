@@ -6,6 +6,10 @@
 // same Wikipedia article the photographs came from, so a card lands on the
 // landmark itself rather than on its capital.
 //
+// Provenance: coordinates and captions read off each landmark's Wikipedia
+// article; added 2026-10-02. The photographs are CC BY-SA or public domain and
+// are credited in the demo's public/landmarks/credits.json.
+//
 // The photographs themselves are not part of the package: hosts supply image
 // URLs through the data API (see joinLandmarks).
 import { COUNTRIES_DATA } from './countries.js'
