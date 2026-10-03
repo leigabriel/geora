@@ -1,7 +1,10 @@
 @import "tailwindcss";
 @source "../";
 
-/* self hosted, cached by `npm run assets` */
+/* self hosted, cached by `npm run assets`.
+
+   The urls go through Vite so a build served from a sub-path still resolves
+   them; a bare "/fonts/â€¦" would only work from the domain root. */
 
 /* the globe interface reads in Geist Pixel */
 @font-face {
@@ -9,7 +12,7 @@
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url("/fonts/geist-pixel.woff2") format("woff2");
+  src: url("../fonts/geist-pixel.woff2") format("woff2");
 }
 
 /* documentation is set in JetBrains Mono, which is easier to read at length */
@@ -18,7 +21,7 @@
   font-style: normal;
   font-weight: 100 800;
   font-display: swap;
-  src: url("/fonts/jetbrains-mono-latin.woff2") format("woff2");
+  src: url("../fonts/jetbrains-mono-latin.woff2") format("woff2");
 }
 
 @theme {
@@ -27,7 +30,7 @@
 }
 
 /* The HUD chrome is deliberately not themed. Panels, modals and buttons always
-   read Paper White — light surfaces, dark text, one blue accent — so switching
+   read Paper White â€” light surfaces, dark text, one blue accent â€” so switching
    the globe theme can never leave the interface with unreadable contrast. Only
    the globe stage (backdrop, sphere, dots, beacons) follows a theme, and it
    does so through scene.setTheme() rather than through these variables. */
@@ -125,7 +128,7 @@ body {
 /* Framed tool clusters. The HUD reads as a set of boxes so a tap target has a
    visible boundary, and the active state fills the box rather than colouring
    type alone. One visual system for every button, panel, label and readout.
-   NOTE: no `font` shorthand here — it would reset font-size/weight and kill
+   NOTE: no `font` shorthand here â€” it would reset font-size/weight and kill
    every `text-[...]` / `font-bold` utility placed on a .hud-btn. */
 @layer components {
   .hud-btn {
