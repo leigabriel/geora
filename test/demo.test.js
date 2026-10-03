@@ -89,7 +89,8 @@ describe("demo consuming geora-globe", () => {
     expect(el).not.toBeNull()
     expect(__scenes).toHaveLength(1)
     expect(el.minimal).toBe(true)
-    expect(el.flagBase).toBe("flags")
+    // flags come from the package, so the demo configures no flagBase
+    expect(el.flagBase).toBe("")
     // persisted demo preferences reach the element
     expect(el.theme).toBe("dark")
     expect(el.globeScale).toBe(0.9)
