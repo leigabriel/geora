@@ -102,20 +102,30 @@ describe("bundled flags", () => {
 })
 
 describe("GeoraGlobe marker visibility", () => {
-  it("keeps markers visible in minimal mode", () => {
-    const { globe, scene } = mount({ minimal: true })
-    expect(scene.last("setMarkersVisible").args[0]).toBe(true)
-    globe.minimal = false
+  it("keeps markers visible by default", () => {
+    const { globe, scene } = mount()
     expect(scene.last("setMarkersVisible").args[0]).toBe(true)
     globe.destroy()
   })
 
-  it("follows showMarkers regardless of minimal", () => {
-    const { globe, scene } = mount({ minimal: true })
+  it("follows showMarkers in both directions", () => {
+    const { globe, scene } = mount()
     globe.showMarkers = false
     expect(scene.last("setMarkersVisible").args[0]).toBe(false)
     globe.showMarkers = true
     expect(scene.last("setMarkersVisible").args[0]).toBe(true)
+    globe.destroy()
+  })
+
+  it("ignores the retired HUD options", () => {
+    // interface switches are not engine state: passing them must neither
+    // change the scene nor leak into the settings snapshot
+    const { globe, scene } = mount({ minimal: true, showHud: false, showTooltip: false, showControls: false })
+    expect(scene.last("setMarkersVisible").args[0]).toBe(true)
+    expect(globe.settings).not.toHaveProperty("minimal")
+    expect(globe.settings).not.toHaveProperty("showHud")
+    expect(globe.settings).not.toHaveProperty("showTooltip")
+    expect(globe.settings).not.toHaveProperty("showControls")
     globe.destroy()
   })
 })
