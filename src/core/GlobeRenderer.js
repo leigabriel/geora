@@ -181,6 +181,11 @@ export function createRenderer(ctx) {
     dots.material.dispose()
     coreMaterial.dispose()
     renderer.dispose()
+    // Hand the WebGL context back right away. Browsers cap how many contexts
+    // may be alive at once (Chrome allows about sixteen), so a page that mounts
+    // and unmounts the globe repeatedly would otherwise exhaust them and start
+    // losing the contexts of globes that are still on screen.
+    renderer.forceContextLoss()
     renderer.domElement.remove()
   }
 
