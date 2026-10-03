@@ -414,6 +414,39 @@ export class GeoraGlobeElement extends HTMLElementBase {
     this.#stage.addEventListener("click", (event) => this.#onStageClick(event))
     this.#stage.addEventListener("pointerdown", (event) => this.#onStagePointerDown(event))
     this.addEventListener("keydown", (event) => this.#onKeydown(event))
+    this.#replayReady()
+  }
+
+  // `geora-ready` is emitted from inside `connectedCallback`, so a listener
+  // added afterwards — which is exactly what React's `useEffect`, Vue's
+  // `onMount` and Svelte's `onMount` do — never hears it. Replay it for those
+  // late listeners so the documented event keeps working, and leave
+  // `whenReady()` for anyone who would rather await a promise.
+  #replayReady() {
+    const nativeAdd = this.addEventListener.bind(this)
+    const nativeRemove = this.removeEventListener.bind(this)
+    const replayed = new WeakSet()
+
+    this.addEventListener = (type, listener, options) => {
+      nativeAdd(type, listener, options)
+      if (type !== "geora-ready" || typeof listener !== "function") return
+      if (!this.#globe?.ready || replayed.has(listener)) return
+      if (options?.signal?.aborted) return
+      replayed.add(listener)
+      // delivered asynchronously so it never lands inside connectedCallback
+      queueMicrotask(() => {
+        if (options?.signal?.aborted) return
+        this.dispatchEvent(new CustomEvent("geora-ready", { detail: {} }))
+        if (options?.once) nativeRemove(type, listener, options)
+      })
+    }
+
+    // a listener that was removed is eligible for a replay again, which keeps
+    // StrictMode's add → remove → add mount cycle behaving like two mounts
+    this.removeEventListener = (type, listener, options) => {
+      nativeRemove(type, listener, options)
+      if (type === "geora-ready") replayed.delete(listener)
+    }
   }
 
   // ---- lifecycle ----------------------------------------------------------
@@ -649,6 +682,35 @@ export class GeoraGlobeElement extends HTMLElementBase {
     this.#globe?.reset()
   }
 
+  /** True once the element has mounted its globe and emitted `geora-ready`. */
+  get ready() {
+    return this.#globe ? this.#globe.ready : false
+  }
+
+  /**
+   * Resolves once the globe is up. Framework mount hooks run *after*
+   * `connectedCallback`, so a `geora-ready` listener added there is too late to
+   * hear the event; await this instead.
+   *
+   *   onMount(async () => { await el.whenReady(); ... })
+   */
+  whenReady() {
+    // resolves with the element, so a host can chain off the same reference it
+    // already holds rather than reaching for the internal engine
+    if (this.#globe) return this.#globe.whenReady().then(() => this)
+    // not connected yet: resolve as soon as connectedCallback builds the globe
+    return new Promise((resolve) => {
+      const check = () => {
+        if (!this.#globe) return false
+        this.removeEventListener("geora-ready", check)
+        resolve(this)
+        return true
+      }
+      if (check()) return
+      this.addEventListener("geora-ready", check)
+    })
+  }
+
   // read-only views onto the engine, mirrored from GeoraGlobe so hosts never
   // have to reach through #globe
   get selection() {
@@ -814,9 +876,12 @@ export class GeoraGlobeElement extends HTMLElementBase {
     if (content.image) {
       const image = document.createElement("img")
       image.className = "card-image"
-      image.src = content.image
       image.alt = content.title
       image.loading = "lazy"
+      // a photo that will not load leaves the card as text rather than a
+      // broken-image glyph
+      image.addEventListener("error", () => image.remove(), { once: true })
+      image.src = content.image
       body.appendChild(image)
     }
 
