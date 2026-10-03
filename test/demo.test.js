@@ -88,7 +88,9 @@ describe("demo consuming geora-globe", () => {
     const el = globe()
     expect(el).not.toBeNull()
     expect(__scenes).toHaveLength(1)
-    expect(el.minimal).toBe(true)
+    // the demo owns the HUD, so the element itself must render no chrome
+    expect(el.shadowRoot.querySelector(".card")).toBeNull()
+    expect(el.shadowRoot.querySelector(".controls")).toBeNull()
     // flags come from the package, so the demo configures no flagBase
     expect(el.flagBase).toBe("")
     // persisted demo preferences reach the element
@@ -151,5 +153,44 @@ describe("demo consuming geora-globe", () => {
       window.dispatchEvent(new KeyboardEvent("keydown", { key: "h", bubbles: true, cancelable: true }))
     })
     expect(container.querySelector('[aria-label="Globe layers navigation"]')).not.toBeNull()
+  })
+
+  // `aria-modal` on a panel is only true if the keyboard agrees: focus has to
+  // go in when it opens, stay in while it is open, and come back when it shuts.
+  it("keeps keyboard focus inside an open panel and hands it back on close", () => {
+    const focusable =
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), ' +
+      'textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])'
+    const itemsIn = (panel) =>
+      [...panel.querySelectorAll(focusable)].filter(
+        (node) => !node.hidden && !node.closest("details:not([open])"),
+      )
+
+    const trigger = container.querySelector('[aria-label="Open settings"]')
+    trigger.focus()
+    expect(document.activeElement).toBe(trigger)
+    act(() => {
+      trigger.click()
+    })
+
+    const panel = container.querySelector('[role="dialog"][aria-label="Settings"]')
+    const items = itemsIn(panel)
+    expect(items.length).toBeGreaterThan(1)
+    expect(document.activeElement).toBe(items[0])
+
+    // Tab off the last control wraps to the first instead of escaping
+    act(() => {
+      items[items.length - 1].focus()
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }))
+    })
+    expect(panel.contains(document.activeElement)).toBe(true)
+    expect(document.activeElement).toBe(items[0])
+
+    // Escape closes the panel and returns focus to the control that opened it
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }))
+    })
+    expect(container.querySelector('[role="dialog"][aria-label="Settings"][data-closed="true"]')).not.toBeNull()
+    expect(document.activeElement).toBe(trigger)
   })
 })
