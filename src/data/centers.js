@@ -1,6 +1,10 @@
 // AI compute campuses: the sites where large-scale accelerator training and
 // inference capacity is actually being built or is already running.
 //
+// Provenance: curated from public operator announcements and press coverage,
+// snapshot added to this repository on 2026-09-30. Announcements move, so the
+// list ages: treat `powerGW` and `status` as what was published at that point.
+//
 // This is a curated reference list, not an inventory. Every entry names a real
 // site announced by its operator, and `powerGW` is the announced capacity in
 // gigawatts where one has been published publicly — it is 0 when the operator has
