@@ -19,7 +19,7 @@ import {
 // The shape a host would supply for a custom deployment:
 //
 // {
-//   countries: [{ code, iso2, name, country, region, lat, lon, pop, tz, curr, fact }],
+//   countries: [{ code, iso2, country, capital, region, lat, lon, pop, tz, curr, fact }],
 //   centers:   [{ id, name, operator, code, lat, lon, tier, powerGW, status, focus }],
 //   markers:   [{ id, name, lat, lon, type }],
 //   landmarks: [{ iso2, country, caption, lat, lon, image }],
