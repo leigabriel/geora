@@ -1,7 +1,17 @@
 // Bottom left: the two controls that act on the globe itself. Same height,
 // radius, border and type as every other control so the HUD reads as one
 // instrument.
-export default function GlobeControls({ spinning, spinEnabled, onReset, onSpin }) {
+export default function GlobeControls({
+  spinning,
+  spinEnabled,
+  spinHint = 'Motion sensitivity is off in Settings',
+  onReset,
+  onSpin,
+}) {
+  // what the control reports has to be what the globe will actually do: the
+  // engine follows prefers-reduced-motion under motion="auto", so an enabled
+  // Spin that cannot spin would be a lie
+  const spinningNow = spinning && spinEnabled
   return (
     <div
       data-ui
@@ -23,14 +33,12 @@ export default function GlobeControls({ spinning, spinEnabled, onReset, onSpin }
         type="button"
         onClick={onSpin}
         disabled={!spinEnabled}
-        aria-pressed={spinning && spinEnabled}
-        data-pressed={spinning && spinEnabled ? 'true' : 'false'}
+        aria-pressed={spinningNow}
+        data-pressed={spinningNow ? 'true' : 'false'}
         title={
-          spinEnabled
-            ? `Automatic rotation ${spinning ? 'on' : 'off'}`
-            : 'Motion sensitivity is off in Settings'
+          spinEnabled ? `Automatic rotation ${spinningNow ? 'on' : 'off'}` : spinHint
         }
-        aria-label={spinning ? 'Pause automatic rotation' : 'Resume automatic rotation'}
+        aria-label={spinningNow ? 'Pause automatic rotation' : 'Resume automatic rotation'}
         className="hud-btn pointer-events-auto min-h-[2rem] disabled:opacity-30"
       >
         Spin
