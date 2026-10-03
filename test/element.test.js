@@ -38,10 +38,6 @@ function stage(el) {
   return el.shadowRoot.querySelector(".stage")
 }
 
-function byAction(root, action) {
-  return root.querySelector(`[data-action="${action}"]`)
-}
-
 const currentScene = () => __scenes.at(-1)
 
 beforeEach(() => {
@@ -254,20 +250,8 @@ describe("configuration through attributes and properties", () => {
     expect(el.spinning).toBe(false)
   })
 
-  it("hides every HUD piece in minimal mode", () => {
-    const el = mount({ minimal: true })
-    const root = el.shadowRoot
-    expect(root.querySelector(".controls").hidden).toBe(true)
-    expect(root.querySelector(".nav").hidden).toBe(true)
-    expect(root.querySelector(".settings-toggle").hidden).toBe(true)
-    el.minimal = false
-    expect(root.querySelector(".controls").hidden).toBe(false)
-    expect(root.querySelector(".nav").hidden).toBe(false)
-    expect(root.querySelector(".settings-toggle").hidden).toBe(true)
-  })
-
-  it("keeps globe markers visible while the HUD is hidden", () => {
-    const el = mount({ minimal: true })
+  it("keeps globe markers visible regardless of interface choices", () => {
+    const el = mount()
     expect(currentScene().last("setMarkersVisible").args[0]).toBe(true)
     el.showMarkers = false
     expect(currentScene().last("setMarkersVisible").args[0]).toBe(false)
@@ -275,84 +259,41 @@ describe("configuration through attributes and properties", () => {
     expect(currentScene().last("setMarkersVisible").args[0]).toBe(true)
   })
 
-  it("gates the HUD with show-hud", () => {
-    const el = mount({ "show-hud": "false" })
-    expect(el.shadowRoot.querySelector(".controls").hidden).toBe(true)
-    expect(el.shadowRoot.querySelector(".nav").hidden).toBe(true)
-    el.showHud = true
-    expect(el.shadowRoot.querySelector(".controls").hidden).toBe(false)
-  })
-
-  it("shows the settings toggle only when settings are enabled", () => {
-    const el = mount({ "show-settings": true })
-    const toggle = el.shadowRoot.querySelector(".settings-toggle")
-    expect(toggle.hidden).toBe(false)
-    el.showSettings = false
-    expect(toggle.hidden).toBe(true)
+  it("ignores the retired HUD attributes", () => {
+    // the element draws no chrome of its own, so the switches that used to
+    // trim it are neither observed nor exposed as properties
+    const el = mount({
+      minimal: true,
+      "show-hud": "false",
+      "show-tooltip": "false",
+      "show-info-card": "false",
+      "show-controls": "false",
+      "show-navigation": "false",
+      "show-settings": "true",
+    })
+    const observed = GeoraGlobeElement.observedAttributes
+    for (const attr of ["minimal", "show-hud", "show-tooltip", "show-info-card", "show-controls", "show-navigation", "show-settings"]) {
+      expect(observed).not.toContain(attr)
+      expect(el.hasAttribute(attr)).toBe(true)
+    }
+    expect(el.minimal).toBeUndefined()
+    expect(el.showHud).toBeUndefined()
+    expect(el.showTooltip).toBeUndefined()
   })
 })
 
-describe("HUD chrome behaviour", () => {
-  it("opens and closes the settings panel", () => {
-    const el = mount({ "show-settings": true })
-    const root = el.shadowRoot
-    const toggle = root.querySelector(".settings-toggle")
-    const panel = root.querySelector(".settings")
-
-    expect(panel.hidden).toBe(true)
-    toggle.click()
-    expect(panel.hidden).toBe(false)
-    expect(toggle.getAttribute("aria-expanded")).toBe("true")
-    toggle.click()
-    expect(panel.hidden).toBe(true)
-    expect(toggle.getAttribute("aria-expanded")).toBe("false")
-  })
-
-  it("toggles auto-rotation from the spin control", () => {
-    const el = mount()
-    const spin = byAction(el.shadowRoot, "spin")
-    expect(spin.getAttribute("aria-pressed")).toBe("true")
-    spin.click()
-    expect(el.spinning).toBe(false)
-    expect(spin.getAttribute("aria-pressed")).toBe("false")
-    expect(spin.getAttribute("aria-label")).toBe("Resume rotation")
-    expect(currentScene().last("setAutoRotate").args[0]).toBe(false)
-  })
-
-  it("resets the view from the reset control", () => {
-    const el = mount()
-    byAction(el.shadowRoot, "reset").click()
-    expect(currentScene().called("reset")).toBe(true)
-  })
-
-  it("cycles layers from the navigation and updates its label", () => {
+describe("rendering only the globe", () => {
+  it("draws no chrome of its own", () => {
     const el = mount()
     const root = el.shadowRoot
-    const label = root.querySelector(".nav-label")
-    const count = root.querySelector(".nav-count")
-    expect(label.textContent).toBe("COUNTRIES")
-    expect(count.textContent).toBe("1 / 4")
-
-    byAction(root, "next").click()
-    expect(el.mode).toBe("polaroid")
-    expect(label.textContent).toBe("POLAROIDS")
-    expect(count.textContent).toBe("2 / 4")
-
-    byAction(root, "prev").click()
-    expect(el.mode).toBe("country")
-  })
-
-  it("switches theme and detail from the settings panel", () => {
-    const el = mount({ "show-settings": true })
-    const root = el.shadowRoot
-    byAction(root, "settings").click()
-    const amber = root.querySelector('[data-theme="amber"]')
-    amber.click()
-    expect(el.theme).toBe("amber")
-    expect(amber.getAttribute("aria-pressed")).toBe("true")
-
-    byAction(root, "detail").click()
-    expect(el.detail).toBe(0)
+    // every interface is the host's to build, so none of the old HUD survives
+    for (const selector of [".tooltip", ".card", ".controls", ".nav", ".settings", ".settings-toggle"]) {
+      expect(root.querySelector(selector)).toBeNull()
+    }
+    expect(root.querySelector("[data-ui]")).toBeNull()
+    // what remains is the stage that hosts the canvas and the live region
+    expect(root.querySelector(".stage")).not.toBeNull()
+    expect(root.querySelector("[data-live]")).not.toBeNull()
   })
 
   it("keeps the stage background at its default when the theme changes", () => {
@@ -373,81 +314,59 @@ describe("HUD chrome behaviour", () => {
   })
 })
 
-describe("events driving the built-in UI", () => {
-  function hoverDetail(marker, x = 10, y = 20) {
-    return { marker, x, y }
+describe("announcing selections to assistive technology", () => {
+  function live(el) {
+    return el.shadowRoot.querySelector("[data-live]")
   }
 
-  it("shows and hides the tooltip from geora-hover", () => {
+  it("narrates a selection and its dismissal", () => {
     const el = mount()
-    const tooltip = el.shadowRoot.querySelector(".tooltip")
-
-    el.dispatchEvent(new CustomEvent("geora-hover", {
-      detail: hoverDetail({ kind: "country", country: defaultCountries[0] }),
-    }))
-    expect(tooltip.dataset.visible).toBe("true")
-    expect(tooltip.querySelector(".tooltip-title").textContent).toBe(defaultCountries[0].country)
-
-    el.dispatchEvent(new CustomEvent("geora-hover", { detail: { marker: null } }))
-    expect(tooltip.dataset.visible).toBe("false")
-  })
-
-  it("respects show-tooltip", () => {
-    const el = mount({ "show-tooltip": false })
-    el.dispatchEvent(new CustomEvent("geora-hover", {
-      detail: hoverDetail({ kind: "country", country: defaultCountries[0] }),
-    }))
-    expect(el.shadowRoot.querySelector(".tooltip").dataset.visible).toBe("false")
-  })
-
-  it("opens the info card from geora-select and closes it from geora-clear", () => {
-    const el = mount()
-    const card = el.shadowRoot.querySelector(".card")
-
     el.dispatchEvent(new CustomEvent("geora-select", {
       detail: { marker: { kind: "country", country: defaultCountries[0] }, x: 10, y: 10 },
     }))
-    expect(card.hidden).toBe(false)
-    expect(card.querySelector(".card-kind").textContent).toBe("Country")
-    expect(card.querySelector(".card-title").textContent).toBe(defaultCountries[0].country)
-    expect(card.querySelector(".card-body").textContent).toContain("Capital")
-    expect(el.shadowRoot.querySelector("[data-live]").textContent).toContain("Country")
+    expect(live(el).textContent).toContain("Country")
+    expect(live(el).textContent).toContain(defaultCountries[0].country)
 
     el.dispatchEvent(new CustomEvent("geora-clear", { detail: {} }))
-    expect(card.hidden).toBe(true)
-    expect(el.shadowRoot.querySelector("[data-live]").textContent).toBe("Selection cleared")
+    expect(live(el).textContent).toBe("Selection cleared")
   })
 
-  it("renders marker cards", () => {
+  it("names each kind of marker it announces", () => {
     const el = mount()
-    const card = el.shadowRoot.querySelector(".card")
-    el.dispatchEvent(new CustomEvent("geora-select", {
-      detail: { marker: { kind: "marker", marker: { id: "m1", name: "Relay", lat: 1, lon: 2, type: "dish" } }, x: 5, y: 5 },
-    }))
-    expect(card.querySelector(".card-kind").textContent).toBe("Marker")
-    expect(card.querySelector(".card-title").textContent).toBe("Relay")
-    expect(card.querySelector(".card-body").textContent).toContain("dish")
+    const announce = (marker) => {
+      el.dispatchEvent(new CustomEvent("geora-select", { detail: { marker, x: 1, y: 1 } }))
+      return live(el).textContent
+    }
+
+    expect(announce({ kind: "center", center: { name: "Site A" }, country: null })).toContain("AI data center")
+    expect(announce({ kind: "analytics", country: defaultCountries[0], row: null })).toContain("Analytics")
+    expect(announce({ kind: "polaroid", landmark: { caption: "Mount Fuji" } })).toContain("Photograph")
+    expect(announce({ kind: "marker", marker: { name: "Relay" } })).toContain("Marker")
   })
 
-  it("keeps the card closed under show-info-card false but still announces", () => {
-    const el = mount({ "show-info-card": false })
-    const card = el.shadowRoot.querySelector(".card")
-    el.dispatchEvent(new CustomEvent("geora-select", {
-      detail: { marker: { kind: "country", country: defaultCountries[0] }, x: 1, y: 1 },
-    }))
-    expect(card.hidden).toBe(true)
-    expect(el.shadowRoot.querySelector("[data-live]").textContent).toContain("Country")
-  })
-
-  it("closes the card from its close button via clearSelection", () => {
+  it("narrates the layer when the mode changes", () => {
     const el = mount()
-    el.selectCountry("PHL")
-    const card = el.shadowRoot.querySelector(".card")
-    expect(card.hidden).toBe(false)
-    card.querySelector(".card-close").click()
-    expect(el.clearSelection()).toBe(false)
-    expect(card.hidden).toBe(true)
-    expect(currentScene().called("restore")).toBe(true)
+    el.dispatchEvent(new CustomEvent("geora-mode-change", { detail: { mode: "polaroid", modes: ["country", "polaroid"] } }))
+    expect(live(el).textContent).toBe("Layer: POLAROIDS")
+  })
+
+  it("still lets the host hear every event it can build a UI from", () => {
+    const el = mount()
+    const hover = vi.fn()
+    const select = vi.fn()
+    el.addEventListener("geora-hover", hover)
+    el.addEventListener("geora-select", select)
+
+    const marker = { kind: "country", country: defaultCountries[0] }
+    el.dispatchEvent(new CustomEvent("geora-hover", { detail: { marker, x: 10, y: 20 } }))
+    el.dispatchEvent(new CustomEvent("geora-select", { detail: { marker, x: 10, y: 10 } }))
+
+    expect(hover).toHaveBeenCalledTimes(1)
+    expect(select).toHaveBeenCalledTimes(1)
+    expect(select.mock.calls[0][0].detail.marker.country).toBe(defaultCountries[0])
+    // and a selection leaves no element of its own behind
+    expect(el.shadowRoot.querySelector(".card")).toBeNull()
+    expect(el.shadowRoot.querySelector(".tooltip")).toBeNull()
   })
 })
 
@@ -472,17 +391,21 @@ describe("keyboard accessibility", () => {
     el.dispatchEvent(event)
     expect(el.mode).toBe("analytics")
     expect(event.defaultPrevented).toBe(true)
-    expect(el.shadowRoot.querySelector(".nav-label").textContent).toBe("ANALYTICS")
+    // the layer change is announced rather than drawn
+    expect(el.shadowRoot.querySelector("[data-live]").textContent).toBe("Layer: ANALYTICS")
   })
 
   it("clears the selection with Escape", () => {
     const el = mount()
     el.selectCountry("PHL")
-    const card = el.shadowRoot.querySelector(".card")
-    expect(card.hidden).toBe(false)
+    expect(el.selection).not.toBeNull()
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }))
-    expect(card.hidden).toBe(true)
-    expect(el.clearSelection()).toBe(false)
+    expect(el.selection).toBeNull()
+    expect(currentScene().called("restore")).toBe(true)
+    // a second Escape has nothing to clear, so it is not consumed
+    const event = new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })
+    el.dispatchEvent(event)
+    expect(event.defaultPrevented).toBe(false)
   })
 })
 
@@ -500,7 +423,7 @@ describe("data, selection and persistence", () => {
     const el = mount()
     expect(el.selection).toBeNull()
     expect(el.selectCountry("PHL")).toBe(true)
-    expect(el.shadowRoot.querySelector(".card").hidden).toBe(false)
+    expect(el.shadowRoot.querySelector("[data-live]").textContent).toContain("Philippines")
     expect(el.selection).toMatchObject({ kind: "country", country: { code: "PHL" } })
     expect(el.clearSelection()).toBe(true)
     expect(el.selection).toBeNull()
