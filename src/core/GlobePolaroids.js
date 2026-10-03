@@ -6,6 +6,17 @@ import { makeHit, dropEntry, track } from "./primitives.js"
 const POLAROID_W = 192
 const POLAROID_H = 244
 
+// A missing photo is expected — most hosts have no photographs at all — so warn
+// once per URL rather than once per card, and never let it break the layer.
+const warned = new Set()
+function warnMissingImage(src) {
+  if (warned.has(src)) return
+  warned.add(src)
+  if (typeof console !== "undefined") {
+    console.warn(`[geora-globe] landmark image could not be loaded, showing the placeholder instead: ${src}`)
+  }
+}
+
 // a photo is labelled by the country it landed in, never by its file name: the
 // picture is the content, the place is the metadata worth reading from orbit
 function polaroidLabel(photo) {
@@ -109,7 +120,15 @@ export function createPolaroids(ctx) {
       const img = new Image()
       entry.img = img
       img.onload = () => paintPolaroid(entry)
+      // A photograph drawn into a canvas taints it unless the response is
+      // CORS-readable, so ask for it explicitly — and treat a refusal as a
+      // missing photo rather than a broken card.
       img.crossOrigin = "anonymous"
+      img.onerror = () => {
+        entry.img = null
+        warnMissingImage(src)
+        paintPolaroid(entry)
+      }
       img.src = src
     }
 
