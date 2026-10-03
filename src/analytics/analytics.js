@@ -34,7 +34,7 @@ export function buildAnalytics(places) {
   let latencyWeighted = 0
 
   for (const place of places) {
-    const rnd = seededRandom(place.code ?? place.name ?? 'geo')
+    const rnd = seededRandom(place.code ?? place.capital ?? 'geo')
     const pop = popMillions(place.pop ?? '0')
     const tz = String(place.tz ?? 'UTC')
     const east = tz.includes('+') || tz === 'UTC+0'
