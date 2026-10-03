@@ -298,6 +298,11 @@ export class GeoraGlobeElement extends HTMLElement {
   persistence: boolean
   flagBase: string
 
+  /** selected public marker, or null */
+  readonly selection: PublicMarker | null
+  /** read-only snapshot of the effective settings */
+  readonly settings: GlobeSettings
+
   /**
    * `geora-ready` is emitted from `connectedCallback`, before framework mount
    * hooks run. `whenReady()` is the race-free way to continue afterwards;
