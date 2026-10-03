@@ -7,8 +7,8 @@ export interface CountryData {
   code: string
   /** full country name, e.g. "Philippines" */
   country?: string
-  /** capital city name */
-  name?: string
+  /** capital city name, e.g. "Manila" */
+  capital?: string
   /** lowercase ISO 3166-1 alpha-2 code, e.g. "ph" */
   iso2?: string
   lat: number
@@ -122,13 +122,6 @@ export interface GeoraGlobeOptions {
   motion?: MotionPref
   showBorders?: boolean
   showMarkers?: boolean
-  showTooltip?: boolean
-  showInfoCard?: boolean
-  showControls?: boolean
-  showNavigation?: boolean
-  showSettings?: boolean
-  showHud?: boolean
-  minimal?: boolean
   persistence?: boolean
   /**
    * Base path for your own flag images, resolved as
@@ -192,13 +185,6 @@ export interface GlobeSettings {
   motion: MotionPref
   showBorders: boolean
   showMarkers: boolean
-  showTooltip: boolean
-  showInfoCard: boolean
-  showControls: boolean
-  showNavigation: boolean
-  showSettings: boolean
-  showHud: boolean
-  minimal: boolean
   persistence: boolean
   flagBase: string
   globeScale: number
@@ -227,7 +213,6 @@ export class GeoraGlobe extends EventTarget {
   motion: boolean
   data: GlobeData
   readonly analytics: unknown
-  readonly settings: GlobeSettings
 
   globeScale: number
   markerScale: number
@@ -244,13 +229,6 @@ export class GeoraGlobe extends EventTarget {
 
   showBorders: boolean
   showMarkers: boolean
-  showTooltip: boolean
-  showInfoCard: boolean
-  showControls: boolean
-  showNavigation: boolean
-  showSettings: boolean
-  showHud: boolean
-  minimal: boolean
   persistence: boolean
   flagBase: string
 
@@ -317,13 +295,6 @@ export class GeoraGlobeElement extends HTMLElement {
 
   showBorders: boolean
   showMarkers: boolean
-  showTooltip: boolean
-  showInfoCard: boolean
-  showControls: boolean
-  showNavigation: boolean
-  showSettings: boolean
-  showHud: boolean
-  minimal: boolean
   persistence: boolean
   flagBase: string
 
