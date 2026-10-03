@@ -16,10 +16,15 @@ The repository also contains a React **demo application** under `demo/`. That
 demo is not published to npm; it is one host building its own interface on top
 of the package. See [The package and the demo](#the-package-and-the-demo).
 
+For a task-by-task walkthrough — every attribute, property, method and event,
+how to rebuild a tooltip and card, and the 0.3.0 → 0.4.0 migration — see
+[HOWTO.md](./HOWTO.md).
+
 ---
 
 ## Contents
 
+- [How-to guide](./HOWTO.md) — full attribute/event reference and recipes
 - [What is Geora?](#what-is-geora)
 - [Quick start](#quick-start)
 - [`<geora-globe>`](#geora-globe)
