@@ -23,21 +23,29 @@ function packageFiles() {
 
 export default defineConfig({
   plugins: [packageFiles()],
-  // the package tarball ships no demo assets: flags, fonts and photographs
-  // belong to the consumer's public directory
+  // the package ships no photographs: landmark images are the consumer's to
+  // supply. Flag artwork is bundled from src/assets.
   publicDir: false,
   build: {
     target: 'es2022',
     sourcemap: true,
+    // Flag artwork is inlined as data URIs on purpose. An emitted file would
+    // need a URL that is correct for every consumer's deploy base, and lib
+    // builds resolve those against `/`; inlining removes the whole question
+    // (no request, no base path, no CORS, works from file:// and a CDN) for
+    // about 57 kB.
+    assetsInlineLimit: Number.MAX_SAFE_INTEGER,
     lib: {
       entry: fileURLToPath(new URL('./src/index.js', import.meta.url)),
       formats: ['es', 'cjs'],
       fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs'),
     },
-    rollupOptions: {
-      // rendering engine and projection stay dependencies of the consumer,
-      // so several globes on one page share one copy of three.js
-      external: ['three', 'd3-geo', 'topojson-client'],
-    },
+    // three, d3-geo and topojson-client are bundled on purpose. Leaving them
+    // external emits bare `import "three"`, which a browser cannot resolve
+    // without a bundler — and the chain is transitive (d3-geo pulls d3-array
+    // and internmap), so an import map would have to mirror the whole tree.
+    // Bundling makes one file work from a plain <script type="module">, an
+    // import map, a CDN, or any bundler, with nothing installed alongside it.
+    rollupOptions: {},
   },
 })
