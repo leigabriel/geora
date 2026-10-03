@@ -18,6 +18,7 @@ export { COUNTRIES_DATA as defaultCountries } from "./data/countries.js"
 export { AI_CENTERS as defaultCenters, CENTER_STATUSES } from "./data/centers.js"
 export { defaultLandmarks, joinLandmarks } from "./data/landmarks.js"
 export { METRICS, metricMeta } from "./analytics/analytics.js"
+export { bundledFlag, bundledFlagCodes } from "./assets/flags.js"
 
 // Registers the element under `tagName`. Called once on import with the
 // default tag; call it yourself for an alias (e.g. "my-globe"). Aliases get a
