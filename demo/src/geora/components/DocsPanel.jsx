@@ -1,29 +1,29 @@
-// The Docs entry in the top right: the package reference as a scannable sheet —
+// The Docs entry in the top right: the package reference as a scannable sheet â€”
 // install steps and attribute / API / event / data / theme tables instead of
 // prose, so a developer can find one line while the globe is on screen. It
 // follows README.md and documents only the public geora-globe API.
 const README_URL = 'https://raw.githubusercontent.com/leigabriel/geora/master/README.md'
-const VERSION = '0.2.0'
+const VERSION = '0.3.0'
 const CDN = `https://cdn.jsdelivr.net/npm/geora-globe@${VERSION}/+esm`
 
 const SECTIONS = [
   {
     id: 'start',
     title: 'Get started',
-    note: 'geora-globe is a framework-agnostic Three.js halftone globe: one custom element, one JavaScript class. No React, no Tailwind, no build step.',
+    note: 'geora-globe is a framework-agnostic Three.js halftone globe: one custom element, one JavaScript class. No React, no Tailwind, no build step. Flags ship with the package and three, d3-geo and topojson-client are bundled, so there is nothing to install alongside it.',
     steps: [
       'npm install geora-globe  (pnpm add / yarn add work too)',
-      "import 'geora-globe' — the import registers <geora-globe>",
+      "import 'geora-globe' â€” the import registers <geora-globe>",
       'Give it a size: the element fills its parent, so set width and height on it or on an ancestor',
       '<geora-globe theme="paper" mode="country" auto-rotate minimal></geora-globe>',
-      'globe.addEventListener("geora-select", ({ detail }) => …) to build your own UI',
+      'globe.addEventListener("geora-select", ({ detail }) => â€¦) to build your own UI',
     ],
     cdn: `No bundler? <script type="module" src="${CDN}"></script>`,
   },
   {
     id: 'attributes',
     title: 'Attributes',
-    note: 'Every attribute has a same-named camelCase property (flag-base → flagBase). Booleans are value-aware: present means true, "false", "0" and "off" mean false. Also halftone-scale, contrast, intensity, ambient and ocean-opacity.',
+    note: 'Every attribute has a same-named camelCase property (flag-base â†’ flagBase). Booleans are value-aware: present means true, "false", "0" and "off" mean false. Also halftone-scale, contrast, intensity, ambient and ocean-opacity.',
     head: ['Attribute', 'Default', 'What it does'],
     rows: [
       ['theme', 'paper', 'Globe palette: sphere, dots, borders, beacons. Page background never changes'],
@@ -40,11 +40,11 @@ const SECTIONS = [
       ['show-settings', 'false', 'Settings toggle and panel'],
       ['show-markers', 'true', 'Beacons, flags and values'],
       ['show-borders', 'true', 'Country outlines'],
-      ['flag-base', '""', 'Flags as ${flag-base}/${iso2}.png (+ @2x). Empty = code chips, no requests'],
+      ['flag-base', 'bundled', 'Your own flags as ${flag-base}/${iso2}.png (+ @2x). Unset = the flags in the package'],
       ['globe-scale', '0.7', 'Globe size multiplier'],
       ['marker-scale', '0.75', 'Beacon size multiplier'],
       ['detail', '2', 'Dot density: 0 low, 1 medium, 2 high'],
-      ['animation', '1', 'Animation intensity multiplier (0 – 2.5)'],
+      ['animation', '1', 'Animation intensity multiplier (0 â€“ 2.5)'],
       ['halftone-density', '1.0', 'Dot cloud density'],
       ['threshold', '0.4', 'Dot edge threshold'],
       ['persistence', 'false', 'Store preferences in localStorage (geora-globe:prefs:v1)'],
@@ -57,10 +57,10 @@ const SECTIONS = [
     rows: [
       ['theme', 'Built-in key or a custom colour object'],
       ['mode / modes', 'Switch layer (clears the selection) / restrict the rotation'],
-      ['spinning / motion / detail / animation', 'Booleans and 0 – 2 numbers, as in the table above'],
+      ['spinning / motion / detail / animation', 'Booleans and 0 â€“ 2 numbers, as in the table above'],
       ['globeScale / markerScale', 'Size multipliers, applied live'],
-      ['halftone', 'Partial object merge: { density, threshold, contrast, … }'],
-      ['data', 'globe.data = { countries, centers, markers, landmarks } — partial is fine'],
+      ['halftone', 'Partial object merge: { density, threshold, contrast, â€¦ }'],
+      ['data', 'globe.data = { countries, centers, markers, landmarks } â€” partial is fine'],
       ['setData(next)', 'Merge any subset; omitted collections keep their contents'],
       ['selectCountry(code)', 'true when found; accepts ISO alpha-3 or alpha-2'],
       ['clearSelection()', 'true when something was selected'],
@@ -70,6 +70,7 @@ const SECTIONS = [
       ['rotate(dx, dy) / zoom(delta)', 'Keyboard-accessible drag and wheel'],
       ['reset()', 'Default camera, clears the selection'],
       ['start() / stop() / destroy()', 'Loop control and full teardown'],
+      ['ready / whenReady()', 'geora-ready fires on connect, before a framework mount hook runs; whenReady() is the race-free way in'],
       ['registerGeoraGlobe(tag)', 'Define an alias tag; GeoraGlobe is the headless class'],
     ],
   },
@@ -94,7 +95,7 @@ const SECTIONS = [
   {
     id: 'data',
     title: 'Data',
-    note: 'Defaults ship with the package: 50 countries, 73 AI campuses, 50 landmarks — every collection is optional and fully replaceable. Analytics values are MODELED (population + timezone + a hash of the country code): stable and plausible, never measured.',
+    note: 'Defaults ship with the package: 50 countries, 73 AI campuses, 50 landmarks â€” every collection is optional and fully replaceable. Analytics values are MODELED (population + timezone + a hash of the country code): stable and plausible, never measured.',
     head: ['Collection', 'Fields', 'Notes'],
     rows: [
       ['countries', 'code (ISO alpha-3), iso2, country, name, lat, lon, region, pop, tz, curr, fact', 'code, lat and lon are required'],
@@ -103,22 +104,23 @@ const SECTIONS = [
       ['landmarks', 'iso2, country, caption, lat, lon, image', 'image is any URL; joinLandmarks(places, base) builds base/${iso2}.jpg'],
     ],
   },
-  {
+{
     id: 'images',
     title: 'Flags and photographs',
-    note: 'The package ships no images, so nothing is requested until you point it at your own files — offline-safe out of the box, and a missing file never breaks a beacon.',
+    note: 'Flags for all 50 nations ship inside the package, inlined into the bundle, so beacons show real flags with no configuration and no requests. Photographs do not ship — they are 15 MB of imagery — and the polaroid layer draws a labelled card without them.',
     head: ['Asset', 'Pattern'],
     rows: [
-      ['Flags', 'flag-base="/flags" requests /flags/ph.png and /flags/ph@2x.png'],
-      ['Polaroids', 'landmark.image = "landmarks/jp.jpg" — any URL you like'],
+      ['Flags', 'Bundled by default. Set flag-base="/flags" to use /flags/ph.png and /flags/ph@2x.png instead'],
+      ['Polaroids', 'landmark.image = "landmarks/jp.jpg" — any URL you like, served CORS-readable'],
       ['No flag file', 'The beacon falls back to an ISO code chip'],
       ['joinLandmarks(places, base)', 'Builds landmark entries with image URLs from your countries'],
+      ['bundledFlag(iso2, retina)', 'The bundled flag URL, for use outside the globe'],
     ],
   },
   {
     id: 'themes',
     title: 'Themes',
-    note: 'A theme recolours the globe — sphere, dots, borders, beacons — and never the page background: the stage stays on its default paper white, so the overall look remains paper whichever theme is active. A custom theme is a plain object { background, globe, foreground, accent, border } with missing colours falling back; background is advisory, so apply it yourself through --geora-stage-bg if you want full-page theming.',
+    note: 'A theme recolours the globe â€” sphere, dots, borders, beacons â€” and never the page background: the stage stays on its default paper white, so the overall look remains paper whichever theme is active. A custom theme is a plain object { background, globe, foreground, accent, border } with missing colours falling back; background is advisory, so apply it yourself through --geora-stage-bg if you want full-page theming.',
     head: ['Key', 'Label', 'Globe'],
     rows: [
       ['paper', 'PAPER WHITE', 'Light sphere, ink dots, blue accents'],
@@ -138,7 +140,7 @@ const SECTIONS = [
       ['polaroid', 'POLAROIDS', 'One photograph per landmark, pinned where it stands'],
       ['analytics', 'ANALYTICS', 'Modeled telemetry per nation (labelled MODELED)'],
       ['centers', 'AI DATA CENTERS', 'Announced AI compute campuses'],
-      ['markers', 'MARKERS', 'Host-supplied markers — only present once you supply data'],
+      ['markers', 'MARKERS', 'Host-supplied markers â€” only present once you supply data'],
     ],
   },
   {
@@ -147,10 +149,10 @@ const SECTIONS = [
     note: 'Applies while the globe has focus; arrows, + and -, Home, digits and Escape are captured and prevent default.',
     head: ['Key', 'Action'],
     rows: [
-      ['← → ↑ ↓', 'Rotate'],
+      ['â† â†’ â†‘ â†“', 'Rotate'],
       ['+ / -', 'Zoom'],
       ['Home', 'Reset the view'],
-      ['1 – 9', 'Jump to a layer'],
+      ['1 â€“ 9', 'Jump to a layer'],
       ['Escape', 'Close settings, then clear the selection'],
       ['Tab', 'Leave the globe for the next control'],
     ],
@@ -172,14 +174,14 @@ const SECTIONS = [
   {
     id: 'frameworks',
     title: 'Frameworks',
-    note: 'There is no framework-specific package — the element is a normal DOM node in all of them.',
+    note: 'There is no framework-specific package â€” the element is a normal DOM node in all of them.',
     head: ['Framework', 'Usage'],
     rows: [
       ['Plain HTML', `<script type="module" src="${CDN}"></script>`],
-      ['React', '<geora-globe ref={ref} theme="matrix" /> — add listeners in useEffect'],
-      ['Vue', '<geora-globe ref="globe" mode="polaroid" /> — onMounted / onBeforeUnmount'],
-      ['Svelte', '<geora-globe bind:this={globe} mode="analytics" /> — onMount / onDestroy'],
-      ['Headless JS', 'new GeoraGlobe({ container, theme, data }) — no attributes, no HUD'],
+      ['React', '<geora-globe ref={ref} theme="matrix" /> â€” add listeners in useEffect'],
+      ['Vue', '<geora-globe ref="globe" mode="polaroid" /> â€” onMounted / onBeforeUnmount'],
+      ['Svelte', '<geora-globe bind:this={globe} mode="analytics" /> â€” onMount / onDestroy'],
+      ['Headless JS', 'new GeoraGlobe({ container, theme, data }) â€” no attributes, no HUD'],
     ],
   },
   {
@@ -190,8 +192,8 @@ const SECTIONS = [
     rows: [
       ['H', 'Hide the whole interface without disabling the globe'],
       ['D', 'Open this reference'],
-      ['1 – 4', 'Jump to a layer'],
-      ['← →', 'Step through layers from the navigation'],
+      ['1 â€“ 4', 'Jump to a layer'],
+      ['â† â†’', 'Step through layers from the navigation'],
       ['Click a beacon', 'Open its card; Escape or a tap on bare space dismisses it'],
     ],
   },
@@ -210,7 +212,7 @@ const SECTIONS = [
 ]
 
 function toMarkdown() {
-  const lines = [`# geora-globe ${VERSION} — reference`, '', 'Generated from the in-app documentation panel.', '']
+  const lines = [`# geora-globe ${VERSION} â€” reference`, '', 'Generated from the in-app documentation panel.', '']
   for (const section of SECTIONS) {
     lines.push(`## ${section.title}`, '')
     if (section.note) lines.push(section.note, '')
@@ -222,7 +224,7 @@ function toMarkdown() {
       lines.push('')
     }
     if (section.body) lines.push(...section.body, '')
-    if (section.links) lines.push(section.links.map((l) => `[${l.label}](${l.href})`).join(' · '), '')
+    if (section.links) lines.push(section.links.map((l) => `[${l.label}](${l.href})`).join(' Â· '), '')
   }
   return lines.join('\n')
 }
@@ -359,7 +361,7 @@ export default function DocsPanel({ open, onClose }) {
                 <p className="text-[11px]">
                   {section.links.map((link, index) => (
                     <span key={link.href}>
-                      {index > 0 && <span className="px-1.5 opacity-50">·</span>}
+                      {index > 0 && <span className="px-1.5 opacity-50">Â·</span>}
                       <a
                         href={link.href}
                         target="_blank"
@@ -383,7 +385,7 @@ export default function DocsPanel({ open, onClose }) {
           <button type="button" onClick={downloadDocs} className="hud-btn px-2.5 text-[10px]" title="This panel as Markdown">
             <i className="fa-solid fa-download" aria-hidden="true" /> Docs (.md)
           </button>
-          <span className="ml-auto text-[10px] opacity-45">geora-globe {VERSION} · MIT</span>
+          <span className="ml-auto text-[10px] opacity-45">geora-globe {VERSION} Â· MIT</span>
         </footer>
       </aside>
     </>
