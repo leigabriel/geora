@@ -267,7 +267,6 @@ export default function Geora() {
       <geora-globe
         ref={globeRef}
         minimal
-        flagBase="flags"
         theme={prefs.theme}
         mode={mode}
         spinning={spinning}
