@@ -2,16 +2,15 @@
 
 A framework-agnostic 3D halftone globe for the web: tens of thousands of
 shader-lit points forming a planet you can rotate, zoom and inspect, with a
-beacon pinned to every nation.
+flag beacon pinned to every nation.
 
 ```html
 <geora-globe theme="paper" mode="country" auto-rotate></geora-globe>
 ```
 
-<img src="public/globe.png" alt="The Geora globe with flag beacons pinned to every nation" width="1200" />
-
-No React, no Tailwind, no build step. Styles are isolated in the shadow DOM; the
-only runtime dependencies are `three`, `d3-geo` and `topojson-client`.
+No React, no Tailwind, no build step. Flags ship with the package. Styles are
+isolated in the shadow DOM, and `three`, `d3-geo` and `topojson-client` are
+bundled, so there are no peer dependencies to install.
 
 ## Install
 
@@ -19,71 +18,174 @@ only runtime dependencies are `three`, `d3-geo` and `topojson-client`.
 npm install geora-globe
 ```
 
-npm, pnpm and yarn all work. Ships ESM, CJS and type declarations.
-Tarball ≈ 460 kB; the ESM bundle is ≈ 272 kB (≈ 76 kB gzipped).
+Ships ESM, CJS and TypeScript declarations. The tarball is â‰ˆ 1.8 MB; the ESM
+bundle is â‰ˆ 962 kB (â‰ˆ 264 kB gzipped), most of which is Three.js and the
+bundled flag artwork.
 
-## Quick start
+## Plain HTML
+
+No bundler, no import map:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/geora-globe@0.3.0/+esm"></script>
+```
+
+From npm with an import map, when you want the pinned version:
+
+```html
+<script type="importmap">
+  { "imports": { "geora-globe": "/node_modules/geora-globe/dist/index.js" } }
+</script>
+<script type="module">
+  import "geora-globe"
+</script>
+```
 
 ```html
 <!DOCTYPE html>
 <html>
   <head>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/geora-globe@0.2.0/+esm"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/geora-globe@0.3.0/+esm"></script>
+    <style>html, body { margin: 0; height: 100% }</style>
   </head>
-  <body style="margin: 0; height: 100vh">
-    <geora-globe theme="dark" mode="country" auto-rotate minimal></geora-globe>
+  <body>
+    <geora-globe theme="dark" mode="country" auto-rotate></geora-globe>
   </body>
 </html>
 ```
 
-Importing the package registers `<geora-globe>`; the element fills its parent, so
-give it — or an ancestor — a size. `minimal` renders the globe alone: no controls,
-no navigation, no tooltip or card. Drop it, or pick pieces with `show-*`.
+Importing the package registers `<geora-globe>`. The element fills its parent,
+so give it â€” or an ancestor â€” a size. `minimal` renders the globe alone: no
+controls, no navigation, no tooltip or card. Drop it, or trim the HUD piece by
+piece with `show-*`.
 
-From a bundler:
+The stylesheet is injected into the shadow root automatically. You only need it
+if you want to read or override it:
 
 ```js
-import 'geora-globe'
-
-const globe = document.querySelector('geora-globe')
-globe.addEventListener('geora-select', ({ detail }) => {
-  console.log(detail.marker.country ?? detail.marker.marker)
-})
+import "geora-globe/styles.css"
 ```
 
-In React, Vue or Svelte the element is a normal DOM node — bind a ref and add
-listeners in the usual lifecycle hooks. No framework-specific package exists.
+## Frameworks
 
-## How it works
+The element is a normal DOM node. There is no framework-specific package and no
+wrapper component â€” bind a reference and listen to events.
 
-Importing registers the element, which mounts a Three.js renderer in its shadow
-root. A `theme` recolours the globe (sphere, dots, borders, beacons) — never the
-page background — and a `mode` swaps the layer on screen. Configuration comes in
-through attributes, properties and `data`; interactions go out as bubbling
-`geora-*` `CustomEvent`s with plain JSON payloads.
+One thing to know: `geora-ready` is emitted the moment the element connects,
+which is *before* React's `useEffect`, Vue's `onMount` and Svelte's `onMount`
+run. A `geora-ready` listener attached there still gets called â€” the event is
+replayed â€” but `whenReady()` is the race-free way to continue afterwards.
+
+### React
+
+```jsx
+import { useEffect, useRef } from "react"
+import "geora-globe"
+
+export function Globe() {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const el = ref.current
+    const onSelect = ({ detail }) => console.log(detail.marker.country?.country)
+
+    el.addEventListener("geora-select", onSelect)
+    el.whenReady().then(() => console.log("ready, mode:", el.settings.mode))
+    return () => el.removeEventListener("geora-select", onSelect)
+  }, [])
+
+  return <geora-globe ref={ref} theme="dark" mode="country" style={{ height: "100vh" }} />
+}
+```
+
+In JSX, unknown attributes are passed through as attributes, so `flag-base` and
+`auto-rotate` work as written. For non-string values use properties:
+
+```jsx
+<geora-globe ref={ref} globeScale={0.9} detail={1} />
+```
+
+### Vue
+
+```vue
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from "vue"
+import "geora-globe"
+
+const el = ref(null)
+const onSelect = (e) => console.log(e.detail.marker)
+
+onMounted(() => {
+  el.value.addEventListener("geora-select", onSelect)
+  el.value.whenReady().then(() => console.log("ready"))
+})
+onBeforeUnmount(() => el.value?.removeEventListener("geora-select", onSelect))
+</script>
+
+<template>
+  <geora-globe ref="el" theme="dark" mode="country" flag-base="./flags" style="height: 100vh" />
+</template>
+```
+
+### Svelte
+
+```svelte
+<script>
+  import { onMount } from "svelte"
+  import "geora-globe"
+
+  let el
+  const onSelect = (e) => console.log(e.detail.marker)
+
+  onMount(() => {
+    el.addEventListener("geora-select", onSelect)
+    el.whenReady().then(() => console.log("ready"))
+    return () => el.removeEventListener("geora-select", onSelect)
+  })
+</script>
+
+<geora-globe bind:this={el} theme="dark" mode="country" style="height: 100vh" />
+```
 
 ## Attributes
 
-Every attribute has a camelCase property (`flag-base` → `flagBase`). Booleans are
-value-aware: present means true, `"false"`, `"0"` and `"off` mean false.
+Every attribute has a camelCase property (`flag-base` â†’ `flagBase`). Booleans
+are value-aware: present means true, `"false"`, `"0"` and `"off"` mean false.
 
 | Attribute | Default | What it does |
 | --- | --- | --- |
-| `theme` | `paper` | Globe palette; page background never changes |
-| `mode` / `modes` | `country` / auto | Active layer / comma-separated subset |
+| `theme` | `paper` | Globe palette; the page background never changes |
+| `mode` | `country` | Active layer |
+| `modes` | auto | Comma-separated subset to rotate through |
 | `auto-rotate` | `true` | Spin the globe |
 | `motion` | `auto` | `auto` follows `prefers-reduced-motion` |
-| `minimal` | `false` | Hide the built-in HUD → only the globe |
+| `minimal` | `false` | Hide the built-in HUD â†’ only the globe |
 | `show-hud` | `true` | Master switch for the HUD |
-| `show-tooltip` `show-info-card` `show-controls` `show-navigation` `show-settings` | `true` … `false` | Trim the HUD piece by piece |
-| `show-markers` / `show-borders` | `true` | Beacons, flags, values / outlines |
-| `flag-base` | `""` | Flags as `${flag-base}/${iso2}.png`; empty = code chips |
-| `globe-scale` / `marker-scale` | `0.7` / `0.75` | Size multipliers |
-| `detail` / `animation` | `2` / `1` | Dot density / animation intensity |
-| `halftone-density` `halftone-scale` `contrast` `threshold` `intensity` `ambient` `ocean-opacity` | — | Shader calibration |
-| `persistence` | `false` | Store prefs in `localStorage` |
+| `show-tooltip` | `true` | Hover tooltip |
+| `show-info-card` | `true` | Selection card |
+| `show-controls` | `true` | Reset and spin buttons |
+| `show-navigation` | `true` | Layer stepper |
+| `show-settings` | `false` | Settings panel and its toggle |
+| `show-markers` | `true` | Beacons, flags and values |
+| `show-borders` | `true` | Country outlines |
+| `flag-base` | bundled | Your own flags as `${flag-base}/${iso2}.png` |
+| `globe-scale` | `0.7` | Globe size multiplier |
+| `marker-scale` | `0.75` | Marker size multiplier |
+| `detail` | `2` | Dot density, `0`â€“`2` |
+| `animation` | `1` | Animation intensity |
+| `halftone-density` | `1` | Shader calibration |
+| `halftone-scale` | `1` | Shader calibration |
+| `contrast` | `1` | Shader calibration |
+| `threshold` | `0.4` | Shader calibration |
+| `intensity` | `1` | Shader calibration |
+| `ambient` | `0.2` | Shader calibration |
+| `ocean-opacity` | `1` | Shader calibration |
+| `persistence` | `false` | Store preferences in `localStorage` |
 
 ## Properties and methods
+
+The element mirrors the engine, so these work on `<geora-globe>` and on a
+headless `GeoraGlobe` alike.
 
 ```js
 globe.theme = 'dark'                      // key or custom colour object
@@ -104,6 +206,13 @@ globe.reset()
 globe.start(); globe.stop(); globe.destroy()
 ```
 
+Readiness, for framework mount hooks:
+
+```js
+globe.ready          // boolean
+await globe.whenReady()
+```
+
 ## Events
 
 All bubble and cross shadow boundaries, so listen on the element or any ancestor.
@@ -113,20 +222,28 @@ All bubble and cross shadow boundaries, so listen on the element or any ancestor
 | `geora-ready` | `{}` |
 | `geora-hover` | `{ marker, x, y }` (`marker: null` when it leaves) |
 | `geora-select` | `{ marker, x, y }` |
-| `geora-country-select` / `geora-marker-select` | `{ country \| marker, x, y }` |
+| `geora-country-select` | `{ country, x, y }` |
+| `geora-marker-select` | `{ marker, x, y }` |
 | `geora-sphere-select` | `{ lat, lon, onLand, country, distanceKm, x, y }` |
-| `geora-clear` | `{}` — also fired on mode change |
+| `geora-clear` | `{}` â€” also fired on mode change |
 | `geora-mode-change` | `{ mode, modes }` |
-| `geora-theme-change` | `{ theme, key }` — `background` is advisory |
+| `geora-theme-change` | `{ theme, key }` â€” `background` is advisory |
 | `geora-reset` | `{}` |
 
-Markers are plain data: `{ kind: 'country', country }`, `{ kind: 'center', center, country }`,
-`{ kind: 'analytics', country, row }`, `{ kind: 'polaroid', landmark }`, `{ kind: 'marker', marker }`.
+Markers are plain data:
+
+```js
+{ kind: 'country', country }
+{ kind: 'center', center, country }
+{ kind: 'analytics', country, row }
+{ kind: 'polaroid', landmark }
+{ kind: 'marker', marker }
+```
 
 ## Data
 
-Everything comes through `data` / `setData()`. Defaults ship with the package
-(50 countries, 73 AI campuses, 50 landmarks) and are entirely optional.
+Everything comes through `data` / `setData()`. Defaults ship with the package â€”
+50 countries, 73 AI centres, 50 landmarks â€” and are entirely optional.
 
 | Collection | Fields |
 | --- | --- |
@@ -135,10 +252,66 @@ Everything comes through `data` / `setData()`. Defaults ship with the package
 | `markers` | `id`, `name`, `lat`, `lon`, `type` |
 | `landmarks` | `iso2`, `country`, `caption`, `lat`, `lon`, `image` |
 
-`code`, `lat` and `lon` are required on a country. `joinLandmarks(places, base)`
-builds landmark entries with `image = base/${iso2}.jpg`. No images ship with the
-package: point `flag-base` / `image` at your own files, and a missing file falls
-back to an ISO code chip instead of breaking.
+`code`, `lat` and `lon` are required on a country.
+
+```js
+import { GeoraGlobe, defaultCountries } from 'geora-globe'
+
+new GeoraGlobe({
+  container: document.getElementById('stage'),
+  data: {
+    countries: [
+      { code: 'PHL', iso2: 'ph', country: 'Philippines', lat: 12.87, lon: 121.77 },
+    ],
+    markers: [{ id: 'hq', name: 'Manila', lat: 14.6, lon: 121.0 }],
+  },
+})
+```
+
+## Assets
+
+**Flags** are bundled, so beacons show real flags with no configuration. To use
+your own, point `flag-base` at a directory holding `${iso2}.png` and
+`${iso2}@2x.png`:
+
+```html
+<geora-globe flag-base="./assets/flags"></geora-globe>
+```
+
+Prefer a relative base. It resolves against the page, so it keeps working when
+the app is deployed under a sub-path; a leading `/` pins it to the domain root.
+
+Any ISO alpha-2 code without a file falls back to a code chip. The bundled URLs
+are also available directly, which is useful when you want a flag outside the
+globe:
+
+```js
+import { bundledFlag, bundledFlagCodes } from 'geora-globe'
+
+document.querySelector('img').src = bundledFlag('ph', true)
+bundledFlagCodes()  // ['ae', 'ar', …] — the 50 codes that ship
+```
+
+**Landmark photographs** do not ship with the package — they are 15 MB of
+imagery. The `polaroid` mode still works without them, drawing a paper card
+labelled with the country. To add photos, give each landmark an `image`:
+
+```js
+import { joinLandmarks } from 'geora-globe'
+
+new GeoraGlobe({
+  container: document.getElementById('stage'),
+  mode: 'polaroid',
+  data: { landmarks: joinLandmarks(defaultCountries, './assets/landmarks') },
+})
+```
+
+`joinLandmarks(places, base)` sets `image = ${base}/${iso2}.jpg`; any URL works,
+so set `image` per entry instead if your files are named differently. A photo
+that fails to load falls back to the card placeholder and logs one warning
+naming the URL. Photos are drawn into a canvas, so they must be served
+CORS-readable — `crossorigin="anonymous"` is requested for you, which means a
+cross-origin host has to send `Access-Control-Allow-Origin`.
 
 ## Themes and modes
 
@@ -147,81 +320,71 @@ back to an ISO code chip instead of breaking.
 | `paper` | PAPER WHITE | | `country` | beacon + flag per nation |
 | `dark` | INK BLACK | | `polaroid` | one photograph per landmark |
 | `amber` | AMBER SCREEN | | `analytics` | modeled telemetry (labelled) |
-| `matrix` | PHOSPHOR GREEN | | `centers` | announced AI campuses |
+| `matrix` | PHOSPHOR GREEN | | `centers` | announced AI centres |
 | `blueprint` | BLUEPRINT GRID | | `markers` | host markers (needs data) |
 | `dusk` | DUSK VIOLET | | | |
 
-A theme recolours the globe only — the stage stays on its default paper white.
-Custom themes are plain objects (`{ background, globe, foreground, accent, border }`)
-with missing colours falling back; apply `background` yourself through
-`--geora-stage-bg` if you want full-page theming.
+`analytics` mode visualizes **modeled** telemetry â€” deterministic values
+generated from each country's coordinates and population, not measurements.
+They are for demos and layout, not analysis.
 
-## Performance, accessibility, styling
-
-- `detail` is the main lever (`0`–`2`); `animation: 0` keeps it static but
-  interactive; `motion="off"` freezes spin, pulses and inertia.
-- The renderer pauses on disconnect and releases everything on `destroy()`.
-- Focusable, `role="application"`, polite live region, and full keyboard control:
-  arrows rotate, `+`/`-` zoom, `Home` resets, `1`–`9` jump to a layer, `Escape`
-  clears.
-- Custom properties: `--geora-stage-bg`, `--geora-accent`, `--geora-panel`,
-  `--geora-panel-border`, `--geora-text`, `--geora-text-dim`, `--geora-font`,
-  `--geora-shadow`, `--geora-radius`.
+A theme recolours the globe only; the stage stays on its default paper white.
+Custom themes are plain objects (`{ background, globe, foreground, accent,
+border }`) with missing colours falling back. Apply `background` yourself
+through `--geora-stage-bg` if you want full-page theming.
 
 ## Headless
+
+`GeoraGlobe` is the same engine with no attributes and no built-in HUD, for
+hosts that build their own interface:
 
 ```js
 import { GeoraGlobe, registerGeoraGlobe } from 'geora-globe'
 
-new GeoraGlobe({ container: document.getElementById('stage'), theme: 'dark' })
+const globe = new GeoraGlobe({
+  container: document.getElementById('stage'),
+  theme: 'dark',
+})
+
 registerGeoraGlobe('my-globe')   // <my-globe></my-globe>
 ```
 
-`GeoraGlobe` exposes the same properties, methods and events with no attributes
-and no built-in HUD.
+It imports safely on a server: `registerGeoraGlobe()` is a no-op without a DOM,
+and the element simply never upgrades there.
 
-## Development
+## Exports
 
-```bash
-npm install
-npm run dev          # demo at http://localhost:5173
-npm run build:demo && npm run preview   # static demo on :4173
-npm test             # vitest
-npm run lint
-npm run build        # library → dist/
+```js
+import {
+  GeoraGlobe, GeoraGlobeElement, registerGeoraGlobe,
+  THEMES, THEME_KEYS, DEFAULT_THEME, nextTheme, themeHex,
+  MODES, MODE_KEYS, modeMeta,
+  defaultCountries, defaultCenters, CENTER_STATUSES,
+  defaultLandmarks, joinLandmarks,
+  METRICS, metricMeta,
+  bundledFlag, bundledFlagCodes,
+  DEFAULT_HALFTONE, DEFAULT_PROFILE,
+} from 'geora-globe'
 ```
 
-The demo in `demo/` imports `geora-globe` exactly like an external consumer and
-never reaches into `src/`.
+## Performance, accessibility, styling
 
-**Deploy the demo (Vercel):** `vercel.json` pins `npm run build:demo` →
-`demo-dist`. Import the repo in Vercel and deploy, or run `npx vercel --prod`.
-Any static host works — publish `demo-dist/`.
-
-**Publish the package:**
-
-```bash
-npm login
-npm publish --dry-run
-npm version patch     # or minor / major
-npm publish           # prepack builds dist/ automatically
-```
-
-`files` limits the tarball to `dist/`, `README.md` and `LICENSE`.
-
-## Contact
-
-- GitHub: [github.com/leigabriel/geora](https://github.com/leigabriel/geora)
-- Instagram: [instagram.com/leimxnsquare](https://instagram.com/leimxnsquare)
-- Email: [malibiranleigabriel@gmail.com](mailto:malibiranleigabriel@gmail.com)
+- `detail` is the main lever (`0`â€“`2`). `animation: 0` keeps it static but
+  interactive; `motion="off"` freezes spin, pulses and inertia.
+- The renderer pauses on disconnect and releases everything on `destroy()`.
+- Focusable, `role="application"`, polite live region, and full keyboard
+  control: arrows rotate, `+`/`-` zoom, `Home` resets, `1`â€“`9` jump to a layer,
+  `Escape` clears.
+- Custom properties: `--geora-stage-bg`, `--geora-accent`, `--geora-panel`,
+  `--geora-panel-border`, `--geora-text`, `--geora-text-dim`, `--geora-font`,
+  `--geora-shadow`, `--geora-radius`.
 
 ## Credits
 
-Natural Earth via [world-atlas](https://github.com/topojson/world-atlas), flags via
-[flagcdn](https://flagcdn.com), landmark photographs from Wikipedia (CC BY-SA or
-public domain, credited in `public/landmarks/credits.json`), type in Geist Pixel
-(Vercel) and JetBrains Mono (SIL OFL), audio synthesized with Tone.js in the demo.
+Natural Earth via [world-atlas](https://github.com/topojson/world-atlas), flags
+via [flagcdn](https://flagcdn.com), landmark photographs from Wikipedia (CC
+BY-SA or public domain) and used in the demo only.
 
 ## License
 
-MIT © Lei Gabriel
+MIT Â© Lei Gabriel
