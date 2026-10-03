@@ -106,7 +106,7 @@ body {
    leaves the computed value stuck off screen. */
 .slide-right {
   transform: translateX(0);
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, visibility 0s;
 }
 
 /* The layer nav sits on the corner controls' baseline once there is room for
@@ -123,6 +123,11 @@ body {
 
 .slide-right[data-closed="true"] {
   transform: translateX(100%);
+  /* A closed panel must leave the tab order and the accessibility tree, not
+     just sit off screen — otherwise Tab walks into controls nobody can see.
+     The delay keeps it painted for the duration of the slide-out. */
+  visibility: hidden;
+  transition: transform 0.3s ease, visibility 0s linear 0.3s;
 }
 
 /* Framed tool clusters. The HUD reads as a set of boxes so a tap target has a
