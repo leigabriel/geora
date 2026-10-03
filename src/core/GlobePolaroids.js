@@ -109,30 +109,43 @@ export function createPolaroids(ctx) {
       texture,
       img: null,
       label: null,
+      src: null,
       descriptor: { kind: "polaroid", photo },
     }
     entries.set(id, entry)
     ctx.pickables.push(entry)
     applyPolaroid(entry, photo)
 
-    const src = photo.image ?? photo.src
-    if (src) {
-      const img = new Image()
-      entry.img = img
-      img.onload = () => paintPolaroid(entry)
-      // A photograph drawn into a canvas taints it unless the response is
-      // CORS-readable, so ask for it explicitly — and treat a refusal as a
-      // missing photo rather than a broken card.
-      img.crossOrigin = "anonymous"
-      img.onerror = () => {
-        entry.img = null
-        warnMissingImage(src)
-        paintPolaroid(entry)
-      }
-      img.src = src
-    }
-
     return entry
+  }
+
+  // Loading belongs to applying a photo, not to creating a card. An entry is
+  // first built from the defaults, which carry coordinates and captions but no
+  // imagery; a host that then supplies `image` reuses the same entry, and the
+  // photograph has to be picked up there or the card stays a placeholder.
+  function loadPhoto(entry, src) {
+    if (entry.src === src) return
+    entry.src = src
+    entry.img = null
+    if (!src) {
+      paintPolaroid(entry)
+      return
+    }
+    const img = new Image()
+    // A photograph drawn into a canvas taints it unless the response is
+    // CORS-readable, so ask for it explicitly — and treat a refusal as a
+    // missing photo rather than a broken card.
+    img.crossOrigin = "anonymous"
+    img.onload = () => {
+      entry.img = img
+      paintPolaroid(entry)
+    }
+    img.onerror = () => {
+      entry.img = null
+      warnMissingImage(src)
+      paintPolaroid(entry)
+    }
+    img.src = src
   }
 
   function paintPolaroid(entry) {
@@ -143,6 +156,7 @@ export function createPolaroids(ctx) {
   function applyPolaroid(entry, photo) {
     entry.scale = Number.isFinite(photo.scale) ? photo.scale : 1
     entry.descriptor.photo = photo
+    loadPhoto(entry, photo.image ?? photo.src ?? null)
     // the paper is redrawn only when its country label actually changes
     const label = polaroidLabel(photo)
     if (entry.label === label) return
