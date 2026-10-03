@@ -24,6 +24,7 @@
     "LICENSE"
   ],
   "sideEffects": [
+    "./src/index.js",
     "./dist/index.js",
     "./dist/index.cjs",
     "./dist/index.mjs",
