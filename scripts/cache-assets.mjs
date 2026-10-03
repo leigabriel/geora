@@ -1,6 +1,7 @@
-// Caches the runtime assets Geora needs so the app runs with no network access:
-// the country flag PNGs and the UI fonts. Run it after changing the nation list
-// in src/data/countries.js:  npm run assets
+// Caches the runtime assets the demo needs so it runs with no network access:
+// the UI fonts. Flags now live in the package (src/assets/flags) and are
+// re-fetched with `npm run assets` after changing the nation list in
+// src/data/countries.js.
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -8,13 +9,15 @@ import { fileURLToPath } from 'node:url'
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const CHROME_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 // One css2 request per family; each needs a browser UA to return woff2 URLs.
+// The demo bundles these from its own source tree so a build served from a
+// sub-path resolves them.
 const FONTS = [
-  ['JetBrains+Mono:wght@400;500;600;700', 'public/fonts/jetbrains-mono-latin.woff2'],
-  ['Geist+Pixel', 'public/fonts/geist-pixel.woff2'],
+  ['JetBrains+Mono:wght@400;500;600;700', 'demo/src/fonts/jetbrains-mono-latin.woff2'],
+  ['Geist+Pixel', 'demo/src/fonts/geist-pixel.woff2'],
 ]
 const FLAG_SIZES = [
-  ['https://flagcdn.com/w40/{code}.png', 'public/flags'],
-  ['https://flagcdn.com/w160/{code}.png', 'public/flags'],
+  ['https://flagcdn.com/w40/{code}.png', 'src/assets/flags'],
+  ['https://flagcdn.com/w160/{code}.png', 'src/assets/flags'],
 ]
 
 async function save(url, target, headers = {}) {
@@ -53,4 +56,4 @@ async function cacheFlags() {
 
 await cacheFonts()
 await cacheFlags()
-console.log('assets cached in public/')
+console.log('assets cached')
