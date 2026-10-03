@@ -88,6 +88,50 @@ describe("initialization", () => {
     expect(ready).toHaveBeenCalledTimes(1)
   })
 
+  // Frameworks attach listeners in a mount hook that runs after the element is
+  // already in the document, so connectedCallback's event has been and gone by
+  // then. React, Vue and Svelte all do this.
+  it("replays geora-ready for listeners added after the element is connected", async () => {
+    const el = mount()
+    expect(el.ready).toBe(true)
+
+    const late = vi.fn()
+    el.addEventListener("geora-ready", late)
+    expect(late).not.toHaveBeenCalled()
+    await Promise.resolve()
+    expect(late).toHaveBeenCalledTimes(1)
+
+    // a listener registered after a replay is still eligible for one, which is
+    // what React StrictMode's add → remove → add cycle does
+    el.removeEventListener("geora-ready", late)
+    el.addEventListener("geora-ready", late)
+    await Promise.resolve()
+    expect(late).toHaveBeenCalledTimes(2)
+  })
+
+  it("does not replay geora-ready twice to the same live listener", async () => {
+    const el = mount()
+    const ready = vi.fn()
+    el.addEventListener("geora-ready", ready)
+    await Promise.resolve()
+    expect(ready).toHaveBeenCalledTimes(1)
+  })
+
+  it("resolves whenReady() after the fact and while still pending", async () => {
+    const el = mount()
+    await expect(el.whenReady()).resolves.toBe(el)
+
+    const later = document.createElement("geora-globe")
+    const pending = later.whenReady()
+    document.body.appendChild(later)
+    await expect(pending).resolves.toBe(later)
+  })
+
+  it("does not report ready before it is connected", () => {
+    const el = makeElement()
+    expect(el.ready).toBe(false)
+  })
+
   it("labels itself for assistive technology", () => {
     const el = mount()
     expect(el.getAttribute("tabindex")).toBe("0")
