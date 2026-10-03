@@ -2,8 +2,11 @@
 // install steps and attribute / API / event / data / theme tables instead of
 // prose, so a developer can find one line while the globe is on screen. It
 // follows README.md and documents only the public geora-globe API.
+import { useRef } from 'react'
+import useDialogFocus from '../lib/useDialogFocus.js'
+
 const README_URL = 'https://raw.githubusercontent.com/leigabriel/geora/master/README.md'
-const VERSION = '0.3.0'
+const VERSION = '0.4.0'
 const CDN = `https://cdn.jsdelivr.net/npm/geora-globe@${VERSION}/+esm`
 
 const SECTIONS = [
@@ -15,7 +18,7 @@ const SECTIONS = [
       'npm install geora-globe  (pnpm add / yarn add work too)',
       "import 'geora-globe' â€” the import registers <geora-globe>",
       'Give it a size: the element fills its parent, so set width and height on it or on an ancestor',
-      '<geora-globe theme="paper" mode="country" auto-rotate minimal></geora-globe>',
+      '<geora-globe theme="paper" mode="country" auto-rotate></geora-globe>',
       'globe.addEventListener("geora-select", ({ detail }) => â€¦) to build your own UI',
     ],
     cdn: `No bundler? <script type="module" src="${CDN}"></script>`,
@@ -31,13 +34,6 @@ const SECTIONS = [
       ['modes', 'auto', 'Comma-separated subset; auto = every layer that has data'],
       ['auto-rotate', 'true', 'Spin the globe (alias of the spinning property)'],
       ['motion', 'auto', 'auto follows prefers-reduced-motion; on / off override it'],
-      ['minimal', 'false', 'Hide the built-in HUD, so only the globe shows'],
-      ['show-hud', 'true', 'Master switch for the built-in HUD'],
-      ['show-tooltip', 'true', 'Hover tooltip'],
-      ['show-info-card', 'true', 'Selection card'],
-      ['show-controls', 'true', 'Reset / Spin buttons'],
-      ['show-navigation', 'true', 'Layer navigation'],
-      ['show-settings', 'false', 'Settings toggle and panel'],
       ['show-markers', 'true', 'Beacons, flags and values'],
       ['show-borders', 'true', 'Country outlines'],
       ['flag-base', 'bundled', 'Your own flags as ${flag-base}/${iso2}.png (+ @2x). Unset = the flags in the package'],
@@ -95,10 +91,10 @@ const SECTIONS = [
   {
     id: 'data',
     title: 'Data',
-    note: 'Defaults ship with the package: 50 countries, 73 AI campuses, 50 landmarks â€” every collection is optional and fully replaceable. Analytics values are MODELED (population + timezone + a hash of the country code): stable and plausible, never measured.',
+    note: 'Defaults ship with the package: 50 countries, 73 AI campuses, 50 landmarks â€” every collection is optional and fully replaceable. Analytics values are MODELED (population + timezone + a hash of the country code): stable and plausible, never measured. Provenance: countries compiled September 2026 (pop is a rounded magnitude such as "125M", not an official statistic); campuses curated from public operator announcements, added 30 September 2026; landmark coordinates read off each landmark\'s Wikipedia article, added 2 October 2026.',
     head: ['Collection', 'Fields', 'Notes'],
     rows: [
-      ['countries', 'code (ISO alpha-3), iso2, country, name, lat, lon, region, pop, tz, curr, fact', 'code, lat and lon are required'],
+      ['countries', 'code (ISO alpha-3), iso2, country, capital, lat, lon, region, pop, tz, curr, fact', 'code, lat and lon are required'],
       ['centers', 'id, name, operator, code, lat, lon, status, powerGW, tier, focus', 'powerGW is the announced figure, never estimated'],
       ['markers', 'id, name, lat, lon, type', 'Supplying any marker adds the markers layer'],
       ['landmarks', 'iso2, country, caption, lat, lon, image', 'image is any URL; joinLandmarks(places, base) builds base/${iso2}.jpg'],
@@ -153,7 +149,7 @@ const SECTIONS = [
       ['+ / -', 'Zoom'],
       ['Home', 'Reset the view'],
       ['1 â€“ 9', 'Jump to a layer'],
-      ['Escape', 'Close settings, then clear the selection'],
+      ['Escape', 'Clear the selection'],
       ['Tab', 'Leave the globe for the next control'],
     ],
   },
@@ -163,12 +159,8 @@ const SECTIONS = [
     note: 'Styles live in the shadow DOM: the package emits no global CSS, no Tailwind is required, and page styles cannot leak in.',
     head: ['Custom property', 'Use'],
     rows: [
-      ['--geora-stage-bg', 'Page backdrop behind the globe (themes never change it)'],
-      ['--geora-accent', 'Accent colour used by the built-in HUD'],
-      ['--geora-panel / --geora-panel-border', 'Panel surface and border'],
-      ['--geora-text / --geora-text-dim', 'HUD text colours'],
-      ['--geora-font', 'HUD type stack'],
-      ['--geora-shadow / --geora-radius', 'Panel shadow and corner radius'],
+      ['--geora-stage-bg', 'Canvas backdrop behind the globe (themes never change it)'],
+      ['--geora-accent', 'Focus ring colour on the globe'],
     ],
   },
   {
@@ -181,7 +173,7 @@ const SECTIONS = [
       ['React', '<geora-globe ref={ref} theme="matrix" /> â€” add listeners in useEffect'],
       ['Vue', '<geora-globe ref="globe" mode="polaroid" /> â€” onMounted / onBeforeUnmount'],
       ['Svelte', '<geora-globe bind:this={globe} mode="analytics" /> â€” onMount / onDestroy'],
-      ['Headless JS', 'new GeoraGlobe({ container, theme, data }) â€” no attributes, no HUD'],
+      ['Headless JS', 'new GeoraGlobe({ container, theme, data }) â€” no attributes, no element'],
     ],
   },
   {
@@ -256,6 +248,9 @@ const rowLabel = 'border-b border-(--border-color)/60 py-1.5 pr-2 align-top font
 const rowCell = 'border-b border-(--border-color)/60 py-1.5 pr-2 align-top'
 
 export default function DocsPanel({ open, onClose }) {
+  const panelRef = useRef(null)
+  useDialogFocus(open, panelRef)
+
   return (
     <>
       <div
@@ -267,6 +262,7 @@ export default function DocsPanel({ open, onClose }) {
       />
 
       <aside
+        ref={panelRef}
         data-ui
         data-closed={!open}
         role="dialog"
