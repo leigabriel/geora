@@ -134,13 +134,6 @@ export class GeoraGlobe extends EventTarget {
   #motionListener = null
   #showBorders = true
   #showMarkers = true
-  #showTooltip = true
-  #showInfoCard = true
-  #showControls = true
-  #showNavigation = true
-  #showSettings = false
-  #showHud = true
-  #minimal = false
   #persistence = false
   #flagBase = ""
 
@@ -161,13 +154,6 @@ export class GeoraGlobe extends EventTarget {
       motion = "auto",
       showBorders = true,
       showMarkers = true,
-      showTooltip = true,
-      showInfoCard = true,
-      showControls = true,
-      showNavigation = true,
-      showSettings = false,
-      showHud = true,
-      minimal = false,
       persistence = false,
       flagBase = "",
       globeScale = DEFAULT_PROFILE.globeScale,
@@ -192,13 +178,6 @@ export class GeoraGlobe extends EventTarget {
     this.#motionPref = pick("motion", stored?.motion, motion)
     this.#showBorders = pick("showBorders", stored?.showBorders, showBorders)
     this.#showMarkers = pick("showMarkers", stored?.showMarkers, showMarkers)
-    this.#showTooltip = pick("showTooltip", stored?.showTooltip, showTooltip)
-    this.#showInfoCard = pick("showInfoCard", stored?.showInfoCard, showInfoCard)
-    this.#showControls = pick("showControls", stored?.showControls, showControls)
-    this.#showNavigation = pick("showNavigation", stored?.showNavigation, showNavigation)
-    this.#showSettings = pick("showSettings", stored?.showSettings, showSettings)
-    this.#showHud = pick("showHud", stored?.showHud, showHud)
-    this.#minimal = pick("minimal", stored?.minimal, minimal)
     this.#flagBase = pick("flagBase", stored?.flagBase, flagBase)
     this.#persistence = Boolean(persistence)
 
@@ -270,13 +249,6 @@ export class GeoraGlobe extends EventTarget {
         motion: this.#motionPref,
         showBorders: this.#showBorders,
         showMarkers: this.#showMarkers,
-        showTooltip: this.#showTooltip,
-        showInfoCard: this.#showInfoCard,
-        showControls: this.#showControls,
-        showNavigation: this.#showNavigation,
-        showSettings: this.#showSettings,
-        showHud: this.#showHud,
-        minimal: this.#minimal,
         flagBase: this.#flagBase,
         profile: this.#profile,
         halftone: this.#halftone,
@@ -663,13 +635,6 @@ export class GeoraGlobe extends EventTarget {
       motion: this.#motionPref,
       showBorders: this.#showBorders,
       showMarkers: this.#showMarkers,
-      showTooltip: this.#showTooltip,
-      showInfoCard: this.#showInfoCard,
-      showControls: this.#showControls,
-      showNavigation: this.#showNavigation,
-      showSettings: this.#showSettings,
-      showHud: this.#showHud,
-      minimal: this.#minimal,
       persistence: this.#persistence,
       flagBase: this.#flagBase,
       ...this.#profile,
@@ -806,69 +771,6 @@ export class GeoraGlobe extends EventTarget {
   set showMarkers(value) {
     this.#showMarkers = Boolean(value)
     this.#scene?.setMarkersVisible(this.#showMarkers)
-    this.#writePrefs()
-  }
-
-  get showTooltip() {
-    return this.#showTooltip
-  }
-
-  set showTooltip(value) {
-    this.#showTooltip = Boolean(value)
-    this.#writePrefs()
-  }
-
-  get showInfoCard() {
-    return this.#showInfoCard
-  }
-
-  set showInfoCard(value) {
-    this.#showInfoCard = Boolean(value)
-    this.#writePrefs()
-  }
-
-  get showControls() {
-    return this.#showControls
-  }
-
-  set showControls(value) {
-    this.#showControls = Boolean(value)
-    this.#writePrefs()
-  }
-
-  get showNavigation() {
-    return this.#showNavigation
-  }
-
-  set showNavigation(value) {
-    this.#showNavigation = Boolean(value)
-    this.#writePrefs()
-  }
-
-  get showSettings() {
-    return this.#showSettings
-  }
-
-  set showSettings(value) {
-    this.#showSettings = Boolean(value)
-    this.#writePrefs()
-  }
-
-  get showHud() {
-    return this.#showHud
-  }
-
-  set showHud(value) {
-    this.#showHud = Boolean(value)
-    this.#writePrefs()
-  }
-
-  get minimal() {
-    return this.#minimal
-  }
-
-  set minimal(value) {
-    this.#minimal = Boolean(value)
     this.#writePrefs()
   }
 
