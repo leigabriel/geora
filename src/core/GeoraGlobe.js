@@ -114,6 +114,8 @@ export class GeoraGlobe extends EventTarget {
   #sceneFactory
   #destroyed = false
   #ready = false
+  #readyPromise = null
+  #resolveReady = null
 
   #content = { countries: [], centers: [], markers: [] }
   #landmarks = []
@@ -432,6 +434,7 @@ export class GeoraGlobe extends EventTarget {
     this.#scene.start()
     if (!this.#ready) {
       this.#ready = true
+      this.#resolveReady?.(this)
       this.#emit("geora-ready", {})
     }
   }
@@ -444,6 +447,8 @@ export class GeoraGlobe extends EventTarget {
   destroy() {
     if (this.#destroyed) return
     this.#destroyed = true
+    // never leave an awaiting host hanging on a globe that is going away
+    this.#resolveReady?.(this)
     this.#scene?.dispose()
     this.#scene = null
     if (this.#motionQuery && this.#motionListener && typeof this.#motionQuery.removeEventListener === "function") {
@@ -622,6 +627,32 @@ export class GeoraGlobe extends EventTarget {
 
   get analytics() {
     return this.#analytics
+  }
+
+  /** True once `start()` has run and `geora-ready` has been emitted. */
+  get ready() {
+    return this.#ready
+  }
+
+  /**
+   * Resolves with this globe once it is ready, immediately if it already is.
+   *
+   * `geora-ready` fires the moment `start()` runs, which for a
+   * `<geora-globe>` in the DOM is inside `connectedCallback`. Frameworks attach
+   * their listeners *after* insertion — React's `useEffect`, Vue's `onMount`,
+   * Svelte's `onMount` all run later — so a listener added there never sees the
+   * event. Await this instead:
+   *
+   *   onMount(async () => { await el.whenReady(); ... })
+   */
+  whenReady() {
+    if (this.#ready) return Promise.resolve(this)
+    if (!this.#readyPromise) {
+      this.#readyPromise = new Promise((resolve) => {
+        this.#resolveReady = resolve
+      })
+    }
+    return this.#readyPromise
   }
 
   get settings() {
