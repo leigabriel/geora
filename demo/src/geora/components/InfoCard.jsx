@@ -116,7 +116,7 @@ export default function InfoCard({ card, config, onClose }) {
             <Shell
                 kind="Polaroid"
                 title={landmark.caption ?? photoPlace?.country ?? 'Photograph'}
-                subtitle={photoPlace ? `${photoPlace.country} · ${photoPlace.name}` : null}
+                subtitle={photoPlace ? `${photoPlace.country} · ${photoPlace.capital}` : null}
                 flag={photoPlace ? <Flag place={photoPlace} className="h-6 w-9 shadow-md" /> : null}
                 onClose={onClose}
             >
@@ -222,7 +222,7 @@ export default function InfoCard({ card, config, onClose }) {
         >
             <div className="mt-1.5 flex items-center gap-1.5 text-[12px] font-semibold text-white">
                 <span className="text-white">▸</span>
-                <span className="truncate">{place.name}</span>
+                <span className="truncate">{place.capital}</span>
             </div>
             <div className="mt-0.5 text-[10px] text-white/80">
                 LAT {formatCoord(place.lat)} LON {formatCoord(place.lon)}
