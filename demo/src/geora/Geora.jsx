@@ -66,6 +66,10 @@ export default function Geora() {
   const [hover, setHover] = useState(null)
   const [hudVisible, setHudVisible] = useState(true)
   const [spinning, setSpinning] = useState(() => !prefersReducedMotion())
+  // motion="auto" follows the OS preference, so the globe holds still under
+  // prefers-reduced-motion whatever Spin says — the control has to say that
+  // too rather than offer a rotation that never happens
+  const [reducedMotion] = useState(prefersReducedMotion)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [docsOpen, setDocsOpen] = useState(false)
   const audio = useMemo(() => createAudio(), [])
@@ -266,7 +270,6 @@ export default function Geora() {
     <div className="geora-stage relative h-full w-full overflow-hidden">
       <geora-globe
         ref={globeRef}
-        minimal
         theme={prefs.theme}
         mode={mode}
         spinning={spinning}
@@ -290,7 +293,12 @@ export default function Geora() {
 
           <GlobeControls
             spinning={spinning}
-            spinEnabled={prefs.profile.motion}
+            spinEnabled={prefs.profile.motion && !reducedMotion}
+            spinHint={
+              prefs.profile.motion
+                ? 'Your system prefers reduced motion, so the globe holds still'
+                : 'Motion sensitivity is off in Settings'
+            }
             onReset={() => {
               dismissCard()
               globeRef.current?.reset()
