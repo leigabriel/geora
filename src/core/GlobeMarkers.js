@@ -2,6 +2,7 @@ import * as THREE from "three"
 import { latLonToVector3 } from "../utils/geo.js"
 import { drawChip, drawFlagTexture, roundedRect } from "../utils/canvas.js"
 import { metricMeta, metricRange, normalizeMetric } from "../analytics/analytics.js"
+import { bundledFlag } from "../assets/flags.js"
 import { makeHit, makeRing, makeStem, makePin, createSprite, dropEntry } from "./primitives.js"
 
 const LABEL_W = 256
@@ -32,11 +33,23 @@ export function createMarkers(ctx) {
   let analytics = null
   let metric = "traffic"
 
+  // `flagBase` is the consumer's own artwork and wins whenever it is set.
+  // Otherwise the flags bundled with the package are used, so a plain
+  // `<geora-globe>` shows real flags with no configuration and no build step.
+  // Either way the result is a pair of absolute URLs, already rewritten by the
+  // consumer's bundler for whatever base it deploys under.
   const flagUrl = (place) => {
+    const code = place.iso2
+    if (!code) return null
     const base = ctx.options.flagBase
-    if (!base || !place.iso2) return null
-    const clean = String(base).replace(/\/+$/, "")
-    return { standard: `${clean}/${place.iso2}.png`, retina: `${clean}/${place.iso2}@2x.png` }
+    if (base) {
+      const clean = String(base).replace(/\/+$/, "")
+      return { standard: `${clean}/${code}.png`, retina: `${clean}/${code}@2x.png` }
+    }
+    const retina = bundledFlag(code, true)
+    const standard = bundledFlag(code, false)
+    if (!retina && !standard) return null
+    return { standard: standard ?? retina, retina: retina ?? standard }
   }
 
   function createFlagSprite(place) {
