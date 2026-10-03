@@ -1,4 +1,6 @@
+import { useRef } from 'react'
 import { THEMES, themeHex } from 'geora-globe'
+import useDialogFocus from '../lib/useDialogFocus.js'
 
 function Slider({ label, value, min, max, step, display, onChange }) {
   return (
@@ -70,6 +72,8 @@ export default function SettingsPanel({
 }) {
   const set = (patch) => onHalftone({ ...halftone, ...patch })
   const setProfile = (patch) => onProfile({ ...profile, ...patch })
+  const panelRef = useRef(null)
+  useDialogFocus(open, panelRef)
 
   return (
     <>
@@ -82,6 +86,7 @@ export default function SettingsPanel({
       />
 
       <aside
+        ref={panelRef}
         data-ui
         data-closed={!open}
         role="dialog"
@@ -111,7 +116,7 @@ export default function SettingsPanel({
 
         <Section
           title="Display"
-          note="Globe detail, marker visibility and theme. A theme repaints the globe stage; the interface keeps its own palette so text stays readable."
+          note="The basics — theme, size and density. A theme repaints the globe stage; the interface keeps its own palette so text stays readable. The shader calibration sits collapsed underneath."
         >
           <div className="grid grid-cols-2 gap-1.5" role="group" aria-label="Theme">
             {Object.entries(THEMES).map(([key, theme]) => (
@@ -149,7 +154,7 @@ export default function SettingsPanel({
             onChange={(globeScale) => setProfile({ globeScale })}
           />
           <Slider
-            label="Marker visibility"
+            label="Marker size"
             value={profile.markerScale}
             min={0.5}
             max={1.8}
@@ -183,7 +188,7 @@ export default function SettingsPanel({
           </div>
           <details className="border border-(--border-color) px-2 py-1.5">
             <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-wider opacity-80">
-              Halftone calibration
+              Advanced: halftone calibration
             </summary>
             <div className="mt-2 flex flex-col gap-2.5">
               <Slider
