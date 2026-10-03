@@ -130,7 +130,11 @@ export interface GeoraGlobeOptions {
   showHud?: boolean
   minimal?: boolean
   persistence?: boolean
-  /** base path for flag images; "" (default) renders code chips, no requests */
+  /**
+   * Base path for your own flag images, resolved as
+   * `${flagBase}/${iso2}.png` (plus a `@2x` variant). Leave it unset to use the
+   * flags bundled with the package.
+   */
   flagBase?: string
   globeScale?: number
   markerScale?: number
@@ -253,6 +257,11 @@ export class GeoraGlobe extends EventTarget {
   readonly selection: PublicMarker | null
   readonly settings: GlobeSettings
 
+  /** true once `start()` has run and `geora-ready` has been emitted */
+  readonly ready: boolean
+  /** resolves once ready; use this from framework mount hooks */
+  whenReady(): Promise<this>
+
   start(): void
   stop(): void
   destroy(): void
@@ -317,6 +326,14 @@ export class GeoraGlobeElement extends HTMLElement {
   minimal: boolean
   persistence: boolean
   flagBase: string
+
+  /**
+   * `geora-ready` is emitted from `connectedCallback`, before framework mount
+   * hooks run. `whenReady()` is the race-free way to continue afterwards;
+   * a `geora-ready` listener added after mount is still delivered, replayed.
+   */
+  readonly ready: boolean
+  whenReady(): Promise<this>
 
   start(): void
   stop(): void
