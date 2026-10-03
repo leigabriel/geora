@@ -65,4 +65,31 @@ describe("package manifest", () => {
     // three, d3-geo and topojson-client must stay un-externalised
     expect(config).not.toMatch(/external\s*:/)
   })
+
+  // Registering <geora-globe> is a side effect of importing the entry point, and
+  // it happens in a production build only. The demo aliases the bare specifier
+  // to src/index.js, so if that file is missing from `sideEffects` a bundler
+  // treats it as pure, drops the registerGeoraGlobe() call, and the demo
+  // renders an unregistered 0x0 element instead of a globe — with no error
+  // anywhere. This is the only place that coupling is visible.
+  it("marks every module that registers the element as having side effects", () => {
+    const listed = new Set(pkg.sideEffects)
+    const entry = readFileSync(path.join(root, "src", "index.js"), "utf8")
+    // the call has to actually be there for the flag to mean anything
+    expect(entry).toMatch(/^\s*registerGeoraGlobe\(\)/m)
+    expect(listed, "src/index.js must stay in sideEffects").toContain("./src/index.js")
+    // only the JS entries are modules that can be imported at all; the `types`
+    // condition resolves to a declaration file
+    for (const condition of ["import", "require"]) {
+      const entry = pkg.exports["."][condition].replace(/^\.\//, "")
+      expect(listed, `${condition} entry is not marked`).toContain(`./${entry}`)
+    }
+  })
+
+  it("consumes the source entry in the demo, and that entry is marked", () => {
+    // pins the coupling the previous test reasons about, so changing the alias
+    // without updating sideEffects fails here too
+    const config = readFileSync(path.join(root, "vite.config.js"), "utf8")
+    expect(config).toMatch(/'geora-globe':.*src\/index\.js/)
+  })
 })
